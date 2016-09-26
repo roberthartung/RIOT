@@ -1,0 +1,7 @@
+USEMODULE +=inga-common
+
+include $(RIOTBOARD)/inga-common/Makefile.include
+
+# Flasher is board dependent!
+export FLASHER = avrdude
+export FFLAGS =-c avr109 -p m1284p -P $(PORT) -b 230400 -u -U flash:w:$(HEXFILE)
