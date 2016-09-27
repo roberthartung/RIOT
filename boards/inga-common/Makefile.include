@@ -17,6 +17,3 @@ PORT_LINUX ?= $(firstword $(sort $(wildcard /dev/ttyUSB*)))
 # setup serial terminal
 export BAUD ?= 19200
 include $(RIOTBOARD)/Makefile.include.serial
-
-# setup the boards dependencies
-# include $(RIOTBOARD)/inga-common/Makefile.dep
