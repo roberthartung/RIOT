@@ -24,7 +24,7 @@
 #include "mutex.h"
 #include "periph/spi.h"
 
-#define ENABLE_DEBUG    (0)
+#define ENABLE_DEBUG    (1)
 #include "debug.h"
 
 /* guard this file in case no SPI device is defined */
@@ -42,11 +42,31 @@ static mutex_t lock = MUTEX_INIT;
 
 int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
 {
-    DEBUG("spi.c: conf = %d, speed = %d\n", conf, speed);
+    DEBUG("spi.c: dev = %d, conf = %d, speed = %d\n", dev, conf, speed);
+
     /* make sure device is valid (there is only one...) */
-    if (dev != 0) {
+    switch (dev) {
+      #if SPI_0_EN
+      case SPI_0:
+        SPI_0_SCK_PORT_DIR |= (1 << SPI_0_SCK_PIN);
+        SPI_0_MISO_PORT_DIR |= (1 << SPI_0_MISO_PIN);
+        SPI_0_MOSI_PORT_DIR |= (1 << SPI_0_MOSI_PIN);
+      break;
+      #endif /* SPI_0_EN */
+      /*
+      #if SPI_1_EN
+      case SPI_1:
+        SPI_1_SCK_PORT_DIR |= (1 << SPI_1_SCK_PIN);
+        SPI_1_MISO_PORT_DIR |= (1 << SPI_1_MISO_PIN);
+        SPI_1_MOSI_PORT_DIR |= (1 << SPI_1_MOSI_PIN);
+      break;
+      #endif
+      */
+      default :
+        DEBUG("spi.c: invalid device\n");
         return -1;
-    }
+      break;
+  }
 
     /* the pin configuration for this CPU is fixed:
      * - PB3: MISO (configure as input - done automatically)
@@ -58,8 +78,8 @@ int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
      * master correctly, though we do not use it for now (as we handle the chip
      * select externally for now)
      */
-    DDRB |= ((1 << DDB2) | (1 << DDB1) | (1 << DDB0));
-
+    ///DDRB |= ((1 << DDB2) | (1 << DDB1) | (1 << DDB0));
+    
     /* make sure the SPI is not powered off */
     MEGA_PRR &= ~(1 << PRSPI);
 
