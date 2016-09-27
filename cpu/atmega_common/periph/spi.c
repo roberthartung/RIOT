@@ -112,3 +112,15 @@ void spi_transfer_bytes(spi_t bus, spi_cs_t cs, bool cont,
         gpio_set((gpio_t)cs);
     }
 }
+
+int spi_transfer_reg(spi_t dev, uint8_t reg, char out, char *in)
+{
+    spi_transfer_bytes(dev, (char *)&reg, NULL, 1);
+    return spi_transfer_bytes(dev, &out, in, 1);
+}
+
+int spi_transfer_regs(spi_t dev, uint8_t reg, char *out, char *in, unsigned int length)
+{
+    spi_transfer_bytes(dev, (char *)&reg, NULL, 1);
+    return spi_transfer_bytes(dev, out, in, length);
+}	

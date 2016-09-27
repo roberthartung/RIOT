@@ -31,6 +31,8 @@
 #include "cpu.h"
 #include "periph/gpio.h"
 #include "periph_conf.h"
+#define ENABLE_DEBUG (1)
+#include "debug.h"
 
 #define GPIO_BASE_PORT_A        (0x20)
 #define GPIO_OFFSET_PORT_H      (0xCB)
@@ -130,6 +132,13 @@ int gpio_init(gpio_t pin, gpio_mode_t mode)
     return 0;
 }
 
+// TODO(rh): Make this better!
+gpio_cb_t radio_cb = NULL;
+void *radio_arg = NULL;
+ISR(PCINT3_vect) {
+  radio_cb(radio_arg);
+}
+
 int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
                   gpio_cb_t cb, void *arg)
 {
@@ -140,6 +149,12 @@ int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
          || (_port_num(pin) == PORT_E && pin_num < 4)
 #endif
          || ((mode != GPIO_IN) && (mode != GPIO_IN_PU))) {
+           // TODO(rh): Make this better!
+           PCMSK3 |= (1 << PCINT30);
+           PCICR |= (1 << PCIE3);
+           radio_cb = cb;
+           radio_arg = arg;
+           DEBUG("gpio.c: invalid pin for gpio_init_int, port: %u, pin: %u, mode: %u\n", _port_num(pin), pin_num, mode);
         return -1;
     }
 
