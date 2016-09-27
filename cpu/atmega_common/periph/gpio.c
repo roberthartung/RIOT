@@ -59,7 +59,20 @@
 #define GPIO_EXT_INT_NUMOF      (2U)
 #endif
 
+#if defined(PCINT3_vect)
+#define GPIO_PC_INT_NUMOF       (32U)
+#elif defined(PCINT2_vect)
+#define GPIO_PC_INT_NUMOF       (24U)
+#elif defined(PCINT1_vect)
+#define GPIO_PC_INT_NUMOF       (16U)
+#elif defined(PCINT0_vect)
+#define GPIO_PC_INT_NUMOF       (8U)
+#endif
+
 static gpio_isr_ctx_t config[GPIO_EXT_INT_NUMOF];
+
+// TODO(rh): Make number configurable
+static gpio_isr_ctx_t pcint[GPIO_PC_INT_NUMOF];
 
 /**
  * @brief     Extract the pin number of the given pin
@@ -132,30 +145,91 @@ int gpio_init(gpio_t pin, gpio_mode_t mode)
     return 0;
 }
 
-// TODO(rh): Make this better!
-gpio_cb_t radio_cb = NULL;
-void *radio_arg = NULL;
-ISR(PCINT3_vect) {
-  radio_cb(radio_arg);
+static inline void pcint_handler(uint8_t port_num, uint8_t pin_num)
+{
+    __enter_isr();
+    pcint[port_num*8+pin_num].cb(pcint[port_num*8+pin_num].arg);
+    __exit_isr();
 }
+
+static inline uint8_t pcint_port_pin(volatile uint8_t *reg) {
+  uint8_t pin = 0;
+  uint8_t val = *reg;
+  while(val > 1) {
+    val = val >> 1;
+    pin++;
+  }
+  return pin;
+}
+
+// TODO(rh): Make this better!
+//gpio_cb_t radio_cb = NULL;
+//void *radio_arg = NULL;
+#ifdef GPIO_PC_INT_NUMOF
+/*
+ * PCINT0 is always defined, if GPIO_PC_INT_NUMOF is defined
+ */
+ISR(PCINT0_vect) {
+  pcint_handler(0, pcint_port_pin(&PCMSK0));
+}
+#if defined(PCINT1_vect)
+ISR(PCINT1_vect) {
+  pcint_handler(1, pcint_port_pin(&PCMSK1));
+}
+#endif /* PCINT1_vect */
+#if defined(PCINT2_vect)
+ISR(PCINT2_vect) {
+  pcint_handler(2, pcint_port_pin(&PCMSK2));
+}
+#endif /* PCINT2_vect */
+#if defined(PCINT3_vect)
+ISR(PCINT3_vect) {
+  // DEBUG("PCINT3_vect %u\n", pcint_port_pin(&PCMSK3));
+  pcint_handler(3, pcint_port_pin(&PCMSK3)); // pcint_port_pin(&PCMSK3)
+  // radio_cb(radio_arg);
+}
+#endif /* PCINT3_vect */
+#endif /* GPIO_PC_INT_NUMOF */
 
 int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
                   gpio_cb_t cb, void *arg)
 {
     uint8_t pin_num = _pin_num(pin);
+    uint8_t port_num = _port_num(pin);
 
-    if ((_port_num(pin) == PORT_D && pin_num > 3)
+    /// In case no external interrupt is available: enable a pin change interrupt
+    if ((port_num == PORT_D && pin_num > 3)
 #if defined (PORTE)
-         || (_port_num(pin) == PORT_E && pin_num < 4)
+         || (port_num == PORT_E && pin_num < 4)
 #endif
          || ((mode != GPIO_IN) && (mode != GPIO_IN_PU))) {
-           // TODO(rh): Make this better!
-           PCMSK3 |= (1 << PCINT30);
-           PCICR |= (1 << PCIE3);
-           radio_cb = cb;
-           radio_arg = arg;
-           DEBUG("gpio.c: invalid pin for gpio_init_int, port: %u, pin: %u, mode: %u\n", _port_num(pin), pin_num, mode);
-        return -1;
+           switch(port_num) {
+             case 0 :
+               PCMSK0 |= (1 << pin_num);
+               PCICR |= (1 << PCIE0);
+             break;
+             case 1:
+               PCMSK1 |= (1 << pin_num);
+               PCICR |= (1 << PCIE1);
+             break;
+             case 2 :
+               PCMSK2 |= (1 << pin_num);
+               PCICR |= (1 << PCIE2);
+             break;
+             case 3 :
+               PCMSK3 |= (1 << pin_num);
+               PCICR |= (1 << PCIE3);
+             break;
+           }
+
+           DEBUG("gpio.c: pcint for port: %u, pin: %u, mode: %u\n", port_num, pin_num, mode);
+
+           pcint[port_num*8+pin_num].cb = cb;
+           pcint[port_num*8+pin_num].arg = arg;
+
+           //radio_cb = cb;
+           //radio_arg = arg;
+        return 0;
     }
 
     gpio_init(pin, mode);
