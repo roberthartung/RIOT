@@ -1,0 +1,10 @@
+#image: docker.io/ibrgvz/docker-ubuntu-ppa-stm32-builder:latest
+
+before_script:
+        - echo "Running on ${CI_RUNNER_DESCRIPTION} (#${CI_RUNNER_ID})"
+
+cli:
+        tags:
+                - lab
+        script:
+                - cd examples/hello-world/ && make BOARD=inga-white
