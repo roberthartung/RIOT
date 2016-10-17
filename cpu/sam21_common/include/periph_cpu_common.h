@@ -87,12 +87,63 @@ typedef enum {
 } gpio_mux_t;
 
 /**
+ * @brief   Available values for SERCOM UART RX pad selection
+ */
+typedef enum {
+    UART_PAD_RX_0 = 0x0,    /**< use pad 0 for RX line */
+    UART_PAD_RX_1 = 0x1,    /**< select pad 1 */
+    UART_PAD_RX_2 = 0x2,    /**< select pad 2 */
+    UART_PAD_RX_3 = 0x3,    /**< select pad 3 */
+} uart_rxpad_t;
+
+/**
+ * @brief   Available values for SERCOM UART TX pad selection
+ */
+typedef enum {
+    UART_PAD_TX_0             = 0x0,    /**< select pad 0 */
+    UART_PAD_TX_2             = 0x1,    /**< select pad 2 */
+    UART_PAD_TX_0_RTS_2_CTS_3 = 0x2,    /**< TX is pad 0, on top RTS on pad 2
+                                         *   and CTS on pad 3 */
+} uart_txpad_t;
+
+/**
+ * @brief   Available values for SERCOM SPI MISO pad selection
+ */
+typedef enum {
+    SPI_PAD_MISO_0 = 0x0,       /**< use pad 0 for MISO line */
+    SPI_PAD_MISO_1 = 0x1,       /**< use pad 0 for MISO line */
+    SPI_PAD_MISO_2 = 0x2,       /**< use pad 0 for MISO line */
+    SPI_PAD_MISO_3 = 0x3,       /**< use pad 0 for MISO line */
+} spi_misopad_t;
+
+/**
+ * @brief   Available values for SERCOM SPI MOSI and SCK pad selection
+ */
+typedef enum {
+    SPI_PAD_MOSI_0_SCK_1 = 0x0, /**< use pad 0 for MOSI, pad 1 for SCK */
+    SPI_PAD_MOSI_2_SCK_3 = 0x1, /**< use pad 2 for MOSI, pad 3 for SCK */
+    SPI_PAD_MOSI_3_SCK_1 = 0x2, /**< use pad 3 for MOSI, pad 1 for SCK */
+    SPI_PAD_MOSI_0_SCK_3 = 0x3, /**< use pad 0 for MOSI, pad 3 for SCK */
+} spi_mosipad_t;
+
+/**
+ * @brief   Possible selections for SERCOM SPI clock mode (inspired by Arduino)
+ */
+typedef enum
+{
+    SERCOM_SPI_MODE_0 = 0,      // CPOL : 0  | CPHA : 0
+    SERCOM_SPI_MODE_1 = 1,      // CPOL : 0  | CPHA : 1
+    SERCOM_SPI_MODE_2 = 2,      // CPOL : 1  | CPHA : 0
+    SERCOM_SPI_MODE_3 = 3,      // CPOL : 1  | CPHA : 1
+} sercom_spi_clockmode_t;
+
+/**
  * @brief   Set up alternate function (PMUX setting) for a PORT pin
  *
- * @param[in] dev   Pin to set the multiplexing for
+ * @param[in] pin   Pin to set the multiplexing for
  * @param[in] mux   Mux value
  */
-void gpio_init_mux(gpio_t dev, gpio_mux_t mux);
+void gpio_init_mux(gpio_t pin, gpio_mux_t mux);
 
 #ifdef __cplusplus
 }
