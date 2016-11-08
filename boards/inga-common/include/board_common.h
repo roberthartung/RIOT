@@ -13,6 +13,19 @@
 extern "C" {
 #endif
 
+/**
+ ** Context swap defines
+ ** Setup to use PC6 which is pin change interrupt 14 (PCINT14)
+ ** This emulates a software triggered interrupt
+ ***/
+#define AVR_CONTEXT_SWAP_INIT do { \
+            DDRC |= (1 << PC6); \
+            PCICR |= (1 << PCIE1); \
+            PCMSK1 |= (1 << PCINT14); \
+} while (0)
+#define AVR_CONTEXT_SWAP_INTERRUPT_VECT  PCINT1_vect
+#define AVR_CONTEXT_SWAP_TRIGGER   PORTC ^= (1 << PC6)
+
 #define AT86RF2XX_PARAMS_BOARD {.spi = SPI_0, \
                                 .spi_speed = AT86RF2XX_PARAM_SPI_SPEED, \
                                 .cs_pin = GPIO_PIN(PORT_B, 4),\
