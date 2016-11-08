@@ -223,11 +223,38 @@ void thread_arch_stack_print(void)
     printf("stack size: %u bytes\n", size);
 }
 
+<<<<<<< HEAD
+=======
+//#define USE_AVR_CONTEXT 1
+
+/* This function calculates the ISR_usage */
+int thread_arch_isr_stack_usage(void)
+{
+    /* TODO */
+    return -1;
+}
+
+void *thread_arch_isr_stack_pointer(void)
+{
+    /* TODO */
+    return (void *)-1;
+}
+
+void *thread_arch_isr_stack_start(void)
+{
+    /* TODO */
+    return (void *)-1;
+}
+
+>>>>>>> Added ifdef construct to disable isr switching
 void thread_arch_start_threading(void) __attribute__((naked));
 void thread_arch_start_threading(void)
 {
+    printf("start_threading()\n");
     sched_run();
+    #ifdef USE_AVR_CONTEXT
     AVR_CONTEXT_SWAP_INIT;
+    #endif
     __enter_thread_mode();
 }
 
@@ -241,23 +268,31 @@ void NORETURN __enter_thread_mode(void)
     irq_enable();
     __context_restore();
     __asm__ volatile("ret");
-
     UNREACHABLE();
 }
 
 void thread_arch_yield(void) {
-    AVR_CONTEXT_SWAP_TRIGGER;
+  printf("thread_arch_yield()\n");
+  #ifndef USE_AVR_CONTEXT
+  __context_save();
+  sched_run();
+  irq_enable();
+  __context_restore();
+  __asm__ volatile("ret");
+  #else
+  AVR_CONTEXT_SWAP_TRIGGER;
+  #endif
 }
 
-
 // Use this interrupt to perform all context switches
+#ifdef USE_AVR_CONTEXT
 ISR(AVR_CONTEXT_SWAP_INTERRUPT_VECT, ISR_NAKED) {
     __context_save();
     sched_run();
     __context_restore();
     __asm__ volatile("reti");
 }
-
+#endif
 
 __attribute__((always_inline)) static inline void __context_save(void)
 {
