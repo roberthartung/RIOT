@@ -10,7 +10,6 @@
  * @defgroup    drivers_periph_uart UART
  * @ingroup     drivers_periph
  * @brief       Low-level UART peripheral driver
- * @{
  *
  * This is a basic UART (Universal Asynchronous Receiver Transmitter) interface
  * to allow platform independent access to the MCU's serial communication abilities.
@@ -35,6 +34,8 @@
  * in RIOT which is used for standard input/output functions like `printf()` or
  * `puts()`.
  *
+ * @{
+ *
  * @file
  * @brief       Low-level UART peripheral driver interface definition
  *
@@ -56,15 +57,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @brief   Make sure the number of available UART devices is defined
- * @{
- */
-#ifndef UART_NUMOF
-#error "UART_NUMOF undefined for the target platform"
-#endif
-/** @} */
 
 /**
  * @brief   Define default UART type identifier
@@ -114,6 +106,17 @@ typedef struct {
 /** @} */
 
 /**
+ * @brief   Possible UART return values
+ */
+enum {
+    UART_OK         =  0,   /**< everything in order */
+    UART_NODEV      = -1,   /**< invalid UART device given */
+    UART_NOBAUD     = -2,   /**< given baudrate is not applicable */
+    UART_INTERR     = -3,   /**< all other internal errors */
+    UART_NOMODE     = -4    /**< given mode is not applicable */
+};
+
+/**
  * @brief   Initialize a given UART device
  *
  * The UART device will be initialized with the following configuration:
@@ -122,16 +125,20 @@ typedef struct {
  * - 1 stop bit
  * - baudrate as given
  *
+ * If no callback parameter is given (rx_cb := NULL), the UART will be
+ * initialized in TX only mode.
+ *
  * @param[in] uart          UART device to initialize
  * @param[in] baudrate      desired baudrate in baud/s
  * @param[in] rx_cb         receive callback, executed in interrupt context once
- *                          for every byte that is received (RX buffer filled)
+ *                          for every byte that is received (RX buffer filled),
+ *                          set to NULL for TX only mode
  * @param[in] arg           optional context passed to the callback functions
  *
- * @return                  0 on success
- * @return                  -1 on invalid UART device
- * @return                  -2 on inapplicable baudrate
- * @return                  -3 on other errors
+ * @return                  UART_OK on success
+ * @return                  UART_NODEV on invalid UART device
+ * @return                  UART_NOBAUD on inapplicable baudrate
+ * @return                  UART_INTERR on other errors
  */
 int uart_init(uart_t uart, uint32_t baudrate, uart_rx_cb_t rx_cb, void *arg);
 

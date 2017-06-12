@@ -18,8 +18,8 @@
  * @author      Leon M. George <leon@georgemail.eu>
  */
 
-#ifndef BOARD_H_
-#define BOARD_H_
+#ifndef BOARD_H
+#define BOARD_H
 
 #include "periph/gpio.h"
 
@@ -28,14 +28,14 @@ extern "C" {
 #endif
 
 /**
- * @brief   Xtimer configuration
+ * @name   Xtimer configuration
  * @{
  */
 #define XTIMER_WIDTH                (16)
 /** @} */
 
 /**
- * @brief   On-board button configuration
+ * @name    On-board button configuration
  * @{
  */
 #define BUTTON1_DIO         GPIO_PIN(0, 4)
@@ -43,7 +43,7 @@ extern "C" {
 /** @} */
 
 /**
- * @brief   Macros for controlling the on-board LEDs
+ * @name    Macros for controlling the on-board LEDs
  * @{
  */
 #define LED0_PIN            GPIO_PIN(0, 10)
@@ -67,5 +67,5 @@ void board_init(void);
 }
 #endif
 
-#endif /* BOARD_H_ */
+#endif /* BOARD_H */
 /** @} */

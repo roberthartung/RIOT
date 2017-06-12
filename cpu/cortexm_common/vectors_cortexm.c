@@ -212,6 +212,9 @@ __attribute__((naked)) void hard_fault_default(void)
 __attribute__((used)) void hard_fault_handler(uint32_t* sp, uint32_t corrupted, uint32_t exc_return, uint32_t* r4_to_r11_stack)
 {
 #if CPU_HAS_EXTENDED_FAULT_REGISTERS
+    static const uint32_t BFARVALID_MASK = (0x80 << SCB_CFSR_BUSFAULTSR_Pos);
+    static const uint32_t MMARVALID_MASK = (0x80 << SCB_CFSR_MEMFAULTSR_Pos);
+
     /* Copy status register contents to local stack storage, this must be
      * done before any calls to other functions to avoid corrupting the
      * register contents. */
@@ -226,6 +229,8 @@ __attribute__((used)) void hard_fault_handler(uint32_t* sp, uint32_t corrupted, 
     /* Initialize these variables even if they're never used uninitialized.
      * Fixes wrong compiler warning by gcc < 6.0. */
     uint32_t pc = 0;
+    /* cppcheck-suppress variableScope
+     * variable used in assembly-code below */
     uint32_t* orig_sp = NULL;
 
     /* Check if the ISR stack overflowed previously. Not possible to detect
@@ -274,11 +279,11 @@ __attribute__((used)) void hard_fault_handler(uint32_t* sp, uint32_t corrupted, 
     printf(" HFSR: 0x%08" PRIx32 "\n", hfsr);
     printf(" DFSR: 0x%08" PRIx32 "\n", dfsr);
     printf(" AFSR: 0x%08" PRIx32 "\n", afsr);
-    if (((cfsr & SCB_CFSR_BUSFAULTSR_Msk) >> SCB_CFSR_BUSFAULTSR_Pos) & 0x80) {
+    if (cfsr & BFARVALID_MASK) {
         /* BFAR valid flag set */
         printf(" BFAR: 0x%08" PRIx32 "\n", bfar);
     }
-    if (((cfsr & SCB_CFSR_MEMFAULTSR_Msk) >> SCB_CFSR_MEMFAULTSR_Pos) & 0x80) {
+    if (cfsr & MMARVALID_MASK) {
         /* MMFAR valid flag set */
         printf("MMFAR: 0x%08" PRIx32 "\n", mmfar);
     }
@@ -337,7 +342,7 @@ void hard_fault_default(void)
 #endif /* DEVELHELP */
 
 #if defined(CPU_ARCH_CORTEX_M3) || defined(CPU_ARCH_CORTEX_M4) || \
-    defined(CPU_ARCH_CORTEX_M4F)
+    defined(CPU_ARCH_CORTEX_M4F) || defined(CPU_ARCH_CORTEX_M7)
 void mem_manage_default(void)
 {
     core_panic(PANIC_MEM_MANAGE, "MEM MANAGE HANDLER");

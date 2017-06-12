@@ -30,8 +30,6 @@
 #include "cpu.h"
 #include "periph/rtt.h"
 #include "periph_conf.h"
-#include "sched.h"
-#include "thread.h"
 
 #define ENABLE_DEBUG (0)
 #include "debug.h"
@@ -59,6 +57,8 @@ void rtt_init(void)
     RTT_UNLOCK();
     /* Reset RTC */
     rtt->CR = RTC_CR_SWR_MASK;
+    /* cppcheck-suppress redundantAssignment
+     * reset routine */
     rtt->CR = 0;
 
     if (rtt->SR & RTC_SR_TIF_MASK) {
@@ -194,9 +194,7 @@ void RTT_ISR(void)
         }
     }
 
-    if (sched_context_switch_request) {
-        thread_yield();
-    }
+    cortexm_isr_end();
 }
 
 #endif /* RTC_NUMOF */

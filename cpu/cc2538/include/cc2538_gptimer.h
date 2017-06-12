@@ -17,8 +17,8 @@
  * @author          Ian Martin <ian@locicontrols.com>
  */
 
-#ifndef GPTIMER_H
-#define GPTIMER_H
+#ifndef CC2538_GPTIMER_H
+#define CC2538_GPTIMER_H
 
 #include <stdint.h>
 
@@ -117,6 +117,9 @@ typedef struct {
     cc2538_reg_t SYNC;                      /**< GPTIMER Synchronize */
     cc2538_reg_t RESERVED2;                 /**< Reserved word */
 
+    /**
+     * @brief Interrupt mask control
+     */
     union {
         cc2538_reg_t IMR;                   /**< GPTIMER Interrupt Mask */
         struct {
@@ -177,6 +180,6 @@ void isr_timer3_chan1(void);                /**< RIOT Timer 3 Channel 1 Interrup
 } /* end extern "C" */
 #endif
 
-#endif /* GPTIMER_H */
+#endif /* CC2538_GPTIMER_H */
 
 /* @} */

@@ -19,12 +19,14 @@
  *
  * @author  Martine Lenders <mlenders@inf.fu-berlin.de>
  */
-#ifndef SOCK_TYPES_H_
-#define SOCK_TYPES_H_
+#ifndef SOCK_TYPES_H
+#define SOCK_TYPES_H
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "mbox.h"
+#include "net/af.h"
 #include "net/gnrc.h"
 #include "net/gnrc/netreg.h"
 #include "net/sock/ip.h"
@@ -77,5 +79,5 @@ struct sock_udp {
 }
 #endif
 
-#endif /* SOCK_TYPES_H_ */
+#endif /* SOCK_TYPES_H */
 /** @} */

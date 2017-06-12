@@ -8,7 +8,8 @@
  */
 
 /**
- * @ingroup     boards_remote
+ * @defgroup    boards_reva RE-Mote Revision A
+ * @ingroup     boards
  * @brief       Support for the RE-Mote board Revision A
  * @{
  *
@@ -19,12 +20,10 @@
  *              Antonio Lignan <alinan@zolertia.com>
  */
 
-#ifndef BOARD_H_
-#define BOARD_H_
+#ifndef BOARD_H
+#define BOARD_H
 
 #include "cpu.h"
-#include "periph/gpio.h"
-#include "periph/spi.h"
 #include "board_common.h"
 
 #ifdef __cplusplus
@@ -35,9 +34,9 @@
  * @name LED pin definitions
  * @{
  */
-#define LED0_PIN        GPIO_PD5
-#define LED1_PIN        GPIO_PD4
-#define LED2_PIN        GPIO_PD3
+#define LED0_PIN        GPIO_PIN(3, 5)
+#define LED1_PIN        GPIO_PIN(3, 4)
+#define LED2_PIN        GPIO_PIN(3, 3)
 
 #define LED0_MASK       (1 << 5)
 #define LED1_MASK       (1 << 4)
@@ -60,8 +59,9 @@
  * @name User button pin definition
  * @{
  */
-#define BUTTON_GPIO     GPIO_3_PIN
+#define BTN0_PIN        GPIO_PIN(0, 3)
 /** @} */
+
 /**
  * @name  RF switch controlled by SW
  * @brief Controls which RF interface goes to the RP-SMA external antenna
@@ -110,8 +110,13 @@
 #define CC1200_GPD2_GPIO    GPIO_PB0
 /** @} */
 
+/**
+ * @brief Initialize board specific hardware, including clock, LEDs and std-IO
+ */
+void board_init(void);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif
-#endif /* BOARD_H_ */
+#endif /* BOARD_H */
 /** @} */

@@ -21,8 +21,6 @@
  */
 
 #include "cpu.h"
-#include "sched.h"
-#include "thread.h"
 #include "periph/gpio.h"
 #include "periph_conf.h"
 
@@ -43,10 +41,17 @@
  * @brief   Mapping of pins to EXTI lines, -1 means not EXTI possible
  */
 static const int8_t exti_config[2][32] = {
+#ifdef CPU_MODEL_SAMD21J18A
+    { 0,  1,  2,  3,  4,  5,  6,  7, -1,  9, 10, 11, 12, 13, 14, 15,
+      0,  1,  2,  3,  4,  5,  6,  7, 12, 13, -1, 15,  8, -1, 10, 11},
+    { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+      0,  1, -1, -1, -1, -1,  6,  7, -1, -1, -1, -1, -1, -1, 14, 15},
+#elif CPU_MODEL_SAMR21G18A
     {-1,  1, -1, -1,  4,  5,  6,  7, -1,  9, 10, 11, 12, 13, 14, 15,
      -1,  1,  2,  3, -1, -1,  6,  7, 12, 13, -1, 15,  8, -1, 10, 11},
     { 0, -1,  2,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
       0,  1, -1, -1, -1, -1,  6,  7, -1, -1, -1, -1,  8, -1, -1, -1},
+#endif
 };
 
 /**
@@ -140,7 +145,7 @@ int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
     PM->APBAMASK.reg |= PM_APBAMASK_EIC;
     GCLK->CLKCTRL.reg = (EIC_GCLK_ID |
                          GCLK_CLKCTRL_CLKEN |
-                         GCLK_CLKCTRL_GEN_GCLK0);
+                         GCLK_CLKCTRL_GEN_GCLK2);
     while (GCLK->STATUS.bit.SYNCBUSY) {}
     /* configure the active flank */
     EIC->CONFIG[exti >> 3].reg &= ~(0xf << ((exti & 0x7) * 4));
@@ -214,7 +219,7 @@ void gpio_write(gpio_t pin, int value)
 
 void isr_eic(void)
 {
-    for (int i = 0; i < NUMOF_IRQS; i++) {
+    for (unsigned i = 0; i < NUMOF_IRQS; i++) {
         if (EIC->INTFLAG.reg & (1 << i)) {
             EIC->INTFLAG.reg = (1 << i);
             if(EIC->INTENSET.reg & (1 << i)) {
@@ -222,7 +227,5 @@ void isr_eic(void)
             }
         }
     }
-    if (sched_context_switch_request) {
-        thread_yield();
-    }
+    cortexm_isr_end();
 }

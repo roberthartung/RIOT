@@ -22,8 +22,8 @@
  * @author      Kaspar Schleiser <kaspar@schleiser.de>
  */
 
-#ifndef NETOPT_H_
-#define NETOPT_H_
+#ifndef NET_NETOPT_H
+#define NET_NETOPT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -206,7 +206,7 @@ typedef enum {
      *
      * Get/set the CCA mode as uint8_t
      * corresponding to the respective PHY standard.
-     * - IEEE 802.15.4: @ref netdev2_ieee802154_cca_mode_t
+     * - IEEE 802.15.4: @ref netdev_ieee802154_cca_mode_t
      */
     NETOPT_CCA_MODE,
 
@@ -239,6 +239,35 @@ typedef enum {
      *
      */
     NETOPT_RF_TESTMODE,
+
+    /**
+     * @brief   add an address to a link layer filter list
+     *
+     * 'Getting' this option from a device will return a pointer of type
+     * @ref l2filter_t to the first entry of a filter list.
+     * When 'Setting' this option a pointer to an link layer address as well as
+     * the length of the address are expected as parameters.
+     */
+    NETOPT_L2FILTER,
+
+    /**
+     * @brief   remove an address from a link layer filter list
+     *
+     * 'Getting' this value always returns -ENOTSUP.
+     * When 'Setting' this option a pointer to an link layer address as well as
+     * the length of the address are expected as parameters. 'Setting' this
+     * option will lead to the given address being removed from the filer list.
+     */
+    NETOPT_L2FILTER_RM,
+
+    /**
+     * @brief   Energy level during the last performed CCA or RX frame
+     *
+     * Get the last ED level available as an int8_t. The source of the
+     * measurement is unspecified and may come from the latest CCA
+     * measurement (CCA mode 1), or from the last received frame.
+     */
+    NETOPT_LAST_ED_LEVEL,
 
     /* add more options if needed */
 
@@ -303,5 +332,5 @@ const char *netopt2str(netopt_t opt);
 }
 #endif
 
-#endif /* NETOPT_H_ */
+#endif /* NET_NETOPT_H */
 /** @} */

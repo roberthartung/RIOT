@@ -24,8 +24,8 @@
  */
 
 
-#ifndef IPV6_ADDR_H_
-#define IPV6_ADDR_H_
+#ifndef NET_IPV6_ADDR_H
+#define NET_IPV6_ADDR_H
 
 #include <stdbool.h>
 #include <string.h>
@@ -780,7 +780,7 @@ void ipv6_addr_print(const ipv6_addr_t *addr);
 }
 #endif
 
-#endif /* IPV6_ADDR_H_ */
+#endif /* NET_IPV6_ADDR_H */
 /**
  * @}
  */

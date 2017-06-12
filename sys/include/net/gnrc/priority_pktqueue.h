@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2015 Daniel Krebs
+ *               2016 INRIA
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -7,20 +8,20 @@
  */
 
 /**
- * @{
- * @defgroup    net_gnrc_priority_pktqueue Priority packet queue
+ * @defgroup    net_gnrc_priority_pktqueue Priority packet queue for GNRC
  * @ingroup     net_gnrc
+ * @brief       Wrapper for priority_queue that holds gnrc_pktsnip_t*
+ * @{
+ *
  * @file
- * @brief       Wrapper for priority_queue that holds gnrc_pktsnip_t* and is
- *              aware of it's length.
+ * @brief       gnrc priority packet queue API
  *
  * @author      Daniel Krebs <github@daniel-krebs.net>
  * @author      Shuguo Zhuo <shuguo.zhuo@inria.fr>
- * @}
  */
 
-#ifndef GNRC_PRIORITY_PKTQUEUE_H
-#define GNRC_PRIORITY_PKTQUEUE_H
+#ifndef NET_GNRC_PRIORITY_PKTQUEUE_H
+#define NET_GNRC_PRIORITY_PKTQUEUE_H
 
 #include <stdint.h>
 #include <priority_queue.h>
@@ -132,4 +133,5 @@ void gnrc_priority_pktqueue_push(gnrc_priority_pktqueue_t* queue,
 }
 #endif
 
-#endif /* GNRC_PRIORITY_PKTQUEUE_H */
+#endif /* NET_GNRC_PRIORITY_PKTQUEUE_H */
+/** @} */

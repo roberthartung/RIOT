@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2015 Kaspar Schleiser <kaspar@schleiser.de>
  *               2015 FreshTemp, LLC.
- *               2014 Freie Universität Berlin
+ *               2014-2016 Freie Universität Berlin
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -16,23 +16,26 @@
  * @brief       Peripheral MCU configuration for the Atmel SAM L21 Xplained Pro board
  *
  * @author      Thomas Eichinger <thomas.eichinger@fu-berlin.de>
- * @autor       Kaspar Schleiser <kaspar@schleiser.de>
+ * @author      Kaspar Schleiser <kaspar@schleiser.de>
+ * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  */
 
 #ifndef PERIPH_CONF_H
 #define PERIPH_CONF_H
+
+#include "periph_cpu.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief GCLK reference speed
+ * @brief   GCLK reference speed
  */
-#define GCLK_REF (16000000U)
+#define CLOCK_CORECLOCK     (16000000U)
 
 /**
- * @name Timer peripheral configuration
+ * @name    Timer peripheral configuration
  * @{
  */
 #define TIMER_NUMOF        (1U)
@@ -46,7 +49,7 @@ extern "C" {
 /** @} */
 
 /**
- * @name UART configuration
+ * @name    UART configuration
  * @{
  */
 #define UART_NUMOF          (1U)
@@ -68,22 +71,36 @@ extern "C" {
 /** @} */
 
 /**
- * @name SPI configuration
+ * @name    SPI configuration
  * @{
  */
-#define SPI_NUMOF          (1)
-#define SPI_0_EN           1
+static const spi_conf_t spi_config[] = {
+    {
+        .dev      = &(SERCOM0->SPI),
+        .miso_pin = GPIO_PIN(PA, 4),
+        .mosi_pin = GPIO_PIN(PA, 6),
+        .clk_pin  = GPIO_PIN(PA, 7),
+        .miso_mux = GPIO_MUX_D,
+        .mosi_mux = GPIO_MUX_D,
+        .clk_mux  = GPIO_MUX_D,
+        .miso_pad = SPI_PAD_MISO_0,
+        .mosi_pad = SPI_PAD_MOSI_2_SCK_3
+
+    }
+};
+
+#define SPI_NUMOF           (sizeof(spi_config) / sizeof(spi_config[0]))
 /** @} */
 
 /**
- * @name I2C configuration
+ * @name    I2C configuration
  * @{
  */
 #define I2C_NUMOF          (0)
 /** @} */
 
 /**
- * @name RTC configuration
+ * @name    RTC configuration
  * @{
  */
 #define RTC_NUMOF           (1)
@@ -93,12 +110,33 @@ extern "C" {
 /** @} */
 
 /**
- * @name RTT configuration
+ * @name    RTT configuration
  * @{
  */
 #define RTT_FREQUENCY       (32768U)
 #define RTT_MAX_VALUE       (0xffffffffU)
 #define RTT_NUMOF           (1)
+/** @} */
+
+/**
+ * @name ADC Configuration
+ * @{
+ */
+#define ADC_NUMOF                          (3U)
+
+/* ADC 0 Default values */
+#define ADC_0_CLK_SOURCE                   0 /* GCLK_GENERATOR_0 */
+#define ADC_0_PRESCALER                    ADC_CTRLB_PRESCALER_DIV256
+
+static const adc_conf_chan_t adc_channels[] = {
+    /* port, pin, muxpos */
+    {GPIO_PIN(PA, 10), ADC_INPUTCTRL_MUXPOS(ADC_INPUTCTRL_MUXPOS_AIN18)},
+    {GPIO_PIN(PA, 11), ADC_INPUTCTRL_MUXPOS(ADC_INPUTCTRL_MUXPOS_AIN19)},
+    {GPIO_PIN(PA, 2), ADC_INPUTCTRL_MUXPOS(ADC_INPUTCTRL_MUXPOS_AIN0)}
+};
+
+#define ADC_0_NEG_INPUT                    ADC_INPUTCTRL_MUXNEG(0x18u)
+#define ADC_0_REF_DEFAULT                  ADC_REFCTRL_REFSEL_INTVCC2
 /** @} */
 
 #ifdef __cplusplus

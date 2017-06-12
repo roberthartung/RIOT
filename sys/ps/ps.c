@@ -31,7 +31,7 @@
 #endif
 
 /* list of states copied from tcb.h */
-const char *state_names[] = {
+static const char *state_names[] = {
     [STATUS_RUNNING] = "running",
     [STATUS_PENDING] = "pending",
     [STATUS_STOPPED] = "stopped",
@@ -41,7 +41,8 @@ const char *state_names[] = {
     [STATUS_SEND_BLOCKED] = "bl send",
     [STATUS_REPLY_BLOCKED] = "bl reply",
     [STATUS_FLAG_BLOCKED_ANY] = "bl anyfl",
-    [STATUS_FLAG_BLOCKED_ALL] = "bl allfl"
+    [STATUS_FLAG_BLOCKED_ALL] = "bl allfl",
+    [STATUS_MBOX_BLOCKED] = "bl mbox",
 };
 
 /**
@@ -60,7 +61,7 @@ void ps(void)
 #endif
             "%-9sQ | pri "
 #ifdef DEVELHELP
-           "| stack ( used) | base       | current    "
+           "| stack ( used) | base       | current     "
 #endif
 #ifdef MODULE_SCHEDSTATISTICS
            "| runtime | switches"
@@ -71,7 +72,7 @@ void ps(void)
 #endif
            "state");
 
-#ifdef DEVELHELP
+#if defined(DEVELHELP) && defined(ISR_STACKSIZE)
     int isr_usage = thread_arch_isr_stack_usage();
     void *isr_start = thread_arch_isr_stack_start();
     void *isr_sp = thread_arch_isr_stack_pointer();
@@ -97,7 +98,8 @@ void ps(void)
             overall_used += stacksz;
 #endif
 #ifdef MODULE_SCHEDSTATISTICS
-            double runtime_ticks =  sched_pidlist[i].runtime_ticks / (double) xtimer_now() * 100;
+            double runtime_ticks = sched_pidlist[i].runtime_ticks /
+                                   (double) _xtimer_now64() * 100;
             int switches = sched_pidlist[i].schedules;
 #endif
             printf("\t%3" PRIkernel_pid

@@ -17,13 +17,18 @@
  *              crc16_ccitt_update() with the desired start value
  *              instead of crc16_ccitt_calc().
  *
+ *              There is a more generalized version in @ref sys_checksum_ucrc16,
+ *              that does not utilize a look-up table as this implementation
+ *              does (and is thus also for more memory efficient). Its caveat
+ *              however is that it is slower by about factor 8 than this version.
+ *
  * @{
  * @file
  * @author      Ludwig Knüpfer <ludwig.knuepfer@fu-berlin.de>
  */
 
-#ifndef CRC16_CCITT_H
-#define CRC16_CCITT_H
+#ifndef CHECKSUM_CRC16_CCITT_H
+#define CHECKSUM_CRC16_CCITT_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -61,6 +66,6 @@ uint16_t crc16_ccitt_calc(const unsigned char *buf, size_t len);
 }
 #endif
 
-#endif /* CRC16_CCITT_H */
+#endif /* CHECKSUM_CRC16_CCITT_H */
 
 /** @} */

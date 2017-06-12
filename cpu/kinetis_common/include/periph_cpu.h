@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Freie Universität Berlin
+ * Copyright (C) 2015-2016 Freie Universität Berlin
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -13,11 +13,11 @@
  * @file
  * @brief           CPU specific definitions for internal peripheral handling
  *
- * @author          Hauke Petersen <hauke.peterse@fu-berlin.de>
+ * @author          Hauke Petersen <hauke.petersen@fu-berlin.de>
  */
 
-#ifndef PERIPH_CPU_H_
-#define PERIPH_CPU_H_
+#ifndef PERIPH_CPU_H
+#define PERIPH_CPU_H
 
 #include <stdint.h>
 
@@ -46,6 +46,10 @@ typedef uint16_t gpio_t;
 #define GPIO_PIN(x, y)      (((x + 1) << 12) | (x << 6) | y)
 
 /**
+ * @brief   Starting offset of CPU_ID
+ */
+#define CPUID_ADDR          (&SIM->UIDH)
+/**
  * @brief   Length of the CPU_ID in octets
  */
 #define CPUID_LEN           (16U)
@@ -60,6 +64,44 @@ typedef uint16_t gpio_t;
  * - bit 7: output or input mode
  */
 #define GPIO_MODE(pu, pe, od, out)   (pu | (pe << 1) | (od << 5) | (out << 7))
+
+/**
+ * @brief   Define the maximum number of PWM channels that can be configured
+ */
+#define PWM_CHAN_MAX        (4U)
+
+/**
+ * @brief   Define a CPU specific SPI hardware chip select line macro
+ *
+ * We simply map the 5 hardware channels to the numbers [0-4], this still allows
+ * us to differentiate between GPIP_PINs and SPI_HWSC lines.
+ */
+#define SPI_HWCS(x)         (x)
+
+/**
+ * @brief   Kinetis CPUs have a maximum number of 5 hardware chip select lines
+ */
+#define SPI_HWCS_NUMOF      (5)
+
+/**
+ * @brief   This CPU makes use of the following shared SPI functions
+ * @{
+ */
+#define PERIPH_SPI_NEEDS_TRANSFER_BYTE
+#define PERIPH_SPI_NEEDS_TRANSFER_REG
+#define PERIPH_SPI_NEEDS_TRANSFER_REGS
+/** @} */
+
+/**
+ * @brief   define number of usable power modes
+ */
+#define PM_NUM_MODES    (1U)
+
+/**
+ * @brief   Override the default initial PM blocker
+ * @todo   we block all modes per default, until PM is cleanly implemented
+ */
+#define PM_BLOCKER_INITIAL  { .val_u32 = 0x01010101 }
 
 #ifndef DOXYGEN
 /**
@@ -83,7 +125,7 @@ typedef enum {
  *
  * To combine values just aggregate them using a logical OR.
  */
-enum {
+typedef enum {
     GPIO_AF_ANALOG = PORT_PCR_MUX(0),       /**< use pin as analog input */
     GPIO_AF_GPIO   = PORT_PCR_MUX(1),       /**< use pin as GPIO */
     GPIO_AF_2      = PORT_PCR_MUX(2),       /**< use alternate function 2 */
@@ -95,7 +137,7 @@ enum {
     GPIO_PCR_OD    = (PORT_PCR_ODE_MASK),   /**< open-drain mode */
     GPIO_PCR_PD    = (PORT_PCR_PE_MASK),    /**< enable pull-down */
     GPIO_PCR_PU    = (PORT_PCR_PE_MASK | PORT_PCR_PS_MASK)  /**< enable PU */
-};
+} gpio_pcr_t;
 
 #ifndef DOXYGEN
 /**
@@ -142,6 +184,45 @@ typedef enum {
     ADC_RES_16BIT = ADC_CFG1_MODE(3)    /**< ADC resolution: 16 bit */
 } adc_res_t;
 /** @} */
+
+/**
+ * @brief   Override default PWM mode configuration
+ * @{
+ */
+#define HAVE_PWM_MODE_T
+typedef enum {
+    PWM_LEFT   = (FTM_CnSC_MSB_MASK | FTM_CnSC_ELSB_MASK),  /**< left aligned */
+    PWM_RIGHT  = (FTM_CnSC_MSB_MASK | FTM_CnSC_ELSA_MASK),  /**< right aligned */
+    PWM_CENTER = (FTM_CnSC_MSB_MASK)                        /**< center aligned */
+} pwm_mode_t;
+/** @} */
+#endif /* ndef DOXYGEN */
+
+/**
+ * @name    CPU specific UART modes values
+ * @{
+ */
+/** @brief 8 data bits, no parity, 1 stop bit */
+#define UART_MODE_8N1       (0)
+/** @brief 8 data bits, even parity, 1 stop bit */
+#define UART_MODE_8E1       (UART_C1_PE_MASK)
+/** @brief 8 data bits, odd parity, 1 stop bit */
+#define UART_MODE_8O1       (UART_C1_PE_MASK | UART_C1_PT_MASK)
+/** @} */
+
+#ifndef DOXYGEN
+/**
+ * @brief   Override default ADC resolution values
+ * @{
+ */
+#define HAVE_SPI_MODE_T
+typedef enum {
+    SPI_MODE_0 = 0,                                         /**< CPOL=0, CPHA=0 */
+    SPI_MODE_1 = (SPI_CTAR_CPHA_MASK),                      /**< CPOL=0, CPHA=1 */
+    SPI_MODE_2 = (SPI_CTAR_CPOL_MASK),                      /**< CPOL=1, CPHA=0 */
+    SPI_MODE_3 = (SPI_CTAR_CPOL_MASK | SPI_CTAR_CPHA_MASK)  /**< CPOL=1, CPHA=1 */
+} spi_mode_t;
+/** @} */
 #endif /* ndef DOXYGEN */
 
 /**
@@ -187,18 +268,62 @@ typedef struct {
 } lptmr_conf_t;
 
 /**
+ * @brief   PWM configuration structure
+ */
+typedef struct {
+    FTM_Type* ftm;          /**< used FTM */
+    struct {
+        gpio_t pin;         /**< GPIO pin used, set to GPIO_UNDEF */
+        uint8_t af;         /**< alternate function mapping */
+        uint8_t ftm_chan;   /**< the actual FTM channel used */
+    } chan[PWM_CHAN_MAX];   /**< logical channel configuration */
+    uint8_t chan_numof;     /**< number of actually configured channels */
+    uint8_t ftm_num;        /**< FTM number used */
+} pwm_conf_t;
+
+/**
+ * @brief   SPI module configuration options
+ */
+typedef struct {
+    SPI_Type *dev;                      /**< SPI device to use */
+    gpio_t pin_miso;                    /**< MISO pin used */
+    gpio_t pin_mosi;                    /**< MOSI pin used */
+    gpio_t pin_clk;                     /**< CLK pin used */
+    gpio_t pin_cs[SPI_HWCS_NUMOF];      /**< pins used for HW cs lines */
+    gpio_pcr_t pcr;                     /**< alternate pin function values */
+    uint32_t simmask;                   /**< bit in the SIM register */
+} spi_conf_t;
+
+/**
  * @brief   Possible timer module types
  */
 enum {
-    TIMER_PIT,
-    TIMER_LPTMR,
+    TIMER_PIT,              /**< PIT */
+    TIMER_LPTMR,            /**< LPTMR */
 };
 
 /**
  * @brief   Hardware timer type-specific device macros
+ * @{
  */
 #define TIMER_PIT_DEV(x)   (TIMER_DEV(0 + (x)))
 #define TIMER_LPTMR_DEV(x) (TIMER_DEV(PIT_NUMOF + (x)))
+/** @} */
+
+/**
+ * @brief UART module configuration options
+ */
+typedef struct {
+    UART_Type *dev;             /**< Pointer to module hardware registers */
+    volatile uint32_t *clken;   /**< Clock enable bitband register address */
+    uint32_t freq;              /**< Module clock frequency, usually CLOCK_CORECLOCK or CLOCK_BUSCLOCK */
+    gpio_t pin_rx;              /**< RX pin, GPIO_UNDEF disables RX */
+    gpio_t pin_tx;              /**< TX pin */
+    uint32_t pcr_rx;            /**< Pin configuration register bits for RX */
+    uint32_t pcr_tx;            /**< Pin configuration register bits for TX */
+    IRQn_Type irqn;             /**< IRQ number for this module */
+    uint8_t mode;               /**< UART mode: data bits, parity, stop bits */
+} uart_conf_t;
 
 /**
  * @brief   CPU internal function for initializing PORTs
@@ -212,5 +337,5 @@ void gpio_init_port(gpio_t pin, uint32_t pcr);
 }
 #endif
 
-#endif /* PERIPH_CPU_H_ */
+#endif /* PERIPH_CPU_H */
 /** @} */

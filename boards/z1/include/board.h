@@ -7,8 +7,8 @@
  * directory for more details.
  */
 
-#ifndef Z1_BOARD_H_
-#define Z1_BOARD_H_
+#ifndef BOARD_H
+#define BOARD_H
 
 /**
  * @defgroup    boards_z1 Zolertia Z1
@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 /**
- * @brief   Xtimer configuration
+ * @name    Xtimer configuration
  * @{
  */
 #define XTIMER_DEV                  (0)
@@ -55,11 +55,10 @@ extern "C" {
 /** @} */
 
 /**
- * @brief   CPU core configuration
- *
- * @todo    Move this to the periph_conf.h
+ * @name    CPU core configuration
  * @{
  */
+/** @todo   Move this to the periph_conf.h */
 #define MSP430_INITIAL_CPU_SPEED    8000000uL
 #ifndef F_CPU
 #define F_CPU                       MSP430_INITIAL_CPU_SPEED
@@ -70,7 +69,7 @@ extern "C" {
 /** @} */
 
 /**
- * @brief   LED pin definitions and handlers
+ * @name    LED pin definitions and handlers
  * @{
  */
 #define LED0_PIN                    GPIO_PIN(4, 0)
@@ -95,9 +94,8 @@ extern "C" {
 #define LED2_TOGGLE                 (LED_OUT_REG ^= LED2_MASK)
 /** @} */
 
-
 /**
- * @brief   User button configuration
+ * @name    User button configuration
  * @{
  */
 #define USER_BTN_PxIN      P2IN
@@ -110,8 +108,8 @@ extern "C" {
 /**
  * @brief   Definition of the interface to the CC2420 radio
  */
-#define CC2420_PARAMS_BOARD         {.spi        = SPI_0, \
-                                     .spi_clk    = SPI_SPEED_1MHZ, \
+#define CC2420_PARAMS_BOARD         {.spi        = SPI_DEV(0), \
+                                     .spi_clk    = SPI_CLK_5MHZ, \
                                      .pin_cs     = GPIO_PIN(P3, 0), \
                                      .pin_fifo   = GPIO_PIN(P1, 3), \
                                      .pin_fifop  = GPIO_PIN(P1, 2), \
@@ -125,4 +123,4 @@ extern "C" {
 #endif
 
 /** @} */
-#endif /*  Z1_BOARD_H_ */
+#endif /* BOARD_H */

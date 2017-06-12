@@ -18,8 +18,8 @@
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  */
 
-#ifndef BOARD_H_
-#define BOARD_H_
+#ifndef BOARD_H
+#define BOARD_H
 
 #include "cpu.h"
 #include "periph/gpio.h"
@@ -29,7 +29,7 @@
 #endif
 
 /**
- * @brief   LED pin definitions and handlers
+ * @name    LED pin definitions and handlers
  * @{
  */
 #define LED0_PIN            GPIO_PIN(2, 4)
@@ -61,18 +61,20 @@
 /** @} */
 
 /**
- * @name xtimer configuration
+ * @name    xtimer configuration
  * @{
  */
 #define XTIMER_DEV          (0)
 #define XTIMER_CHAN         (0)
 #define XTIMER_WIDTH        (16)
+#define XTIMER_SHIFT        (0)
+#define XTIMER_HZ           (1000000UL)
 #define XTIMER_BACKOFF      (50)
 #define XTIMER_ISR_BACKOFF  (40)
 /** @} */
 
 /**
- * @name Flash Customer Configuration Area (CCA) parameters
+ * @name    Flash Customer Configuration Area (CCA) parameters
  * @{
  */
 #ifndef UPDATE_CCA
@@ -85,7 +87,7 @@
 /** @} */
 
 /**
- * @brief Initialize board specific hardware, including clock, LEDs and std-IO
+ * @brief   Initialize board specific hardware, including clock, LEDs and std-IO
  */
 void board_init(void);
 
@@ -93,5 +95,5 @@ void board_init(void);
 } /* end extern "C" */
 #endif
 
-#endif /* BOARD_H_ */
+#endif /* BOARD_H */
 /** @} */

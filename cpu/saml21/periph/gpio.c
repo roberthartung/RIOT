@@ -26,13 +26,6 @@
 #include "cpu.h"
 #include "periph/gpio.h"
 
-#include "periph_conf.h"
-#include "saml21_periph.h"
-
-#include "sched.h"
-#include "thread.h"
-#include "panic.h"
-
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
@@ -52,7 +45,7 @@
 static const int8_t exti_config[2][32] = {
     { 0,  1,  2,  3,  4,  5,  6,  7, -1,  9, 10, 11, 12, 13, 14, 15,
       0,  1,  2,  3,  4,  5,  6,  7, 12, 13, -1, 15, -1, -1, 10, 11},
-    {-1,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+    { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
       0,  1, -1, -1, -1, -1,  6,  7, -1, -1, -1, -1, -1, -1, 14, 15},
 };
 
@@ -221,8 +214,5 @@ void isr_eic(void)
             gpio_config[i].cb(gpio_config[i].arg);
         }
     }
-
-    if (sched_context_switch_request) {
-        thread_yield();
-    }
+    cortexm_isr_end();
 }

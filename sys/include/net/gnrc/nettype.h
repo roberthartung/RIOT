@@ -22,8 +22,8 @@
  *
  * @author  Martine Lenders <mlenders@inf.fu-berlin.de>
  */
-#ifndef GNRC_NETTYPE_H_
-#define GNRC_NETTYPE_H_
+#ifndef NET_GNRC_NETTYPE_H
+#define NET_GNRC_NETTYPE_H
 
 #include <inttypes.h>
 
@@ -245,5 +245,5 @@ static inline uint8_t gnrc_nettype_to_protnum(gnrc_nettype_t type)
 }
 #endif
 
-#endif /* GNRC_NETTYPE_H_ */
+#endif /* NET_GNRC_NETTYPE_H */
 /** @} */

@@ -32,6 +32,10 @@ ifneq (,$(filter oneway_malloc,$(USEMODULE)))
     USEMODULE_INCLUDES += $(RIOTBASE)/sys/oneway-malloc/include
 endif
 
+ifneq (,$(filter vfs,$(USEMODULE)))
+    USEMODULE_INCLUDES += $(RIOTBASE)/sys/posix/include
+endif
+
 ifneq (,$(filter cpp11-compat,$(USEMODULE)))
     USEMODULE_INCLUDES += $(RIOTBASE)/sys/cpp11-compat/include
     # make sure cppsupport.o is linked explicitly because __dso_handle is not
@@ -61,8 +65,12 @@ ifneq (,$(filter log_%,$(USEMODULE)))
     include $(RIOTBASE)/sys/log/Makefile.include
 endif
 
+ifneq (,$(filter newlib,$(USEMODULE)))
+    include $(RIOTMAKE)/libc/newlib.mk
+endif
+
 ifneq (,$(filter newlib_syscalls_default,$(USEMODULE)))
-    include $(RIOTBASE)/sys/newlib/Makefile.include
+    include $(RIOTBASE)/sys/newlib_syscalls_default/Makefile.include
 endif
 
 ifneq (,$(filter arduino,$(USEMODULE)))

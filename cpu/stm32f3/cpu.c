@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include "cpu.h"
 #include "periph_conf.h"
+#include "periph/init.h"
 
 /* Check the source to be used for the PLL */
 #if defined(CLOCK_HSI) && defined(CLOCK_HSE)
@@ -57,6 +58,8 @@ void cpu_init(void)
     cortexm_init();
     /* initialize the clock system */
     cpu_clock_init();
+    /* trigger static peripheral initialization */
+    periph_init();
 }
 
 /**
@@ -137,5 +140,15 @@ static void cpu_clock_init(void)
     /* disable the HSI if we use the HSE */
     RCC->CR &= ~(RCC_CR_HSION);
     while (RCC->CR & RCC_CR_HSIRDY) {}
+
+    /* swith I2Cx clock source to SYSCLK */
+    RCC->CFGR3 &= ~(RCC_CFGR3_I2CSW);
+    RCC->CFGR3 |= RCC_CFGR3_I2C1SW_SYSCLK;
+#ifdef RCC_CFGR3_I2C2SW_SYSCLK
+    RCC->CFGR3 |= RCC_CFGR3_I2C2SW_SYSCLK;
+#endif
+#ifdef RCC_CFGR3_I2C3SW_SYSCLK
+    RCC->CFGR3 |= RCC_CFGR3_I2C3SW_SYSCLK;
+#endif
 #endif
 }

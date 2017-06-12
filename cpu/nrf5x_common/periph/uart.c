@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Freie Universität Berlin
+ * Copyright (C) 2014-2017 Freie Universität Berlin
  *               2015 Jan Wagner <mail@jwagner.eu>
  *
  *
@@ -26,12 +26,20 @@
 #include <stdint.h>
 
 #include "cpu.h"
-#include "sched.h"
-#include "thread.h"
 #include "periph/uart.h"
-#include "periph_cpu.h"
-#include "periph_conf.h"
+#include "periph/gpio.h"
 
+#ifdef CPU_MODEL_NRF52840XXAA
+#define PSEL_RXD         NRF_UART0->PSEL.RXD
+#define PSEL_TXD         NRF_UART0->PSEL.TXD
+#define PSEL_RTS         NRF_UART0->PSEL.RTS
+#define PSEL_CTS         NRF_UART0->PSEL.CTS
+#else
+#define PSEL_RXD         NRF_UART0->PSELRXD
+#define PSEL_TXD         NRF_UART0->PSELTXD
+#define PSEL_RTS         NRF_UART0->PSELRTS
+#define PSEL_CTS         NRF_UART0->PSELCTS
+#endif
 
 /**
  * @brief Allocate memory for the interrupt context
@@ -41,7 +49,7 @@ static uart_isr_ctx_t uart_config;
 int uart_init(uart_t uart, uint32_t baudrate, uart_rx_cb_t rx_cb, void *arg)
 {
     if (uart != 0) {
-        return -1;
+        return UART_NODEV;
     }
 
     /* remember callback addresses and argument */
@@ -52,26 +60,32 @@ int uart_init(uart_t uart, uint32_t baudrate, uart_rx_cb_t rx_cb, void *arg)
    /* power on the UART device */
     NRF_UART0->POWER = 1;
 #endif
+
     /* reset configuration registers */
     NRF_UART0->CONFIG = 0;
-    /* configure RX/TX pin modes */
-    GPIO_BASE->DIRSET = (1 << UART_PIN_TX);
-    GPIO_BASE->DIRCLR = (1 << UART_PIN_RX);
-    /* configure UART pins to use */
-    NRF_UART0->PSELTXD = UART_PIN_TX;
-    NRF_UART0->PSELRXD = UART_PIN_RX;
+
+    /* configure RX pin */
+    if (rx_cb) {
+        gpio_init(UART_PIN_RX, GPIO_IN);
+        PSEL_RXD = UART_PIN_RX;
+    }
+
+    /* configure TX pin */
+    gpio_init(UART_PIN_TX, GPIO_OUT);
+    PSEL_TXD = UART_PIN_TX;
+
     /* enable HW-flow control if defined */
 #if UART_HWFLOWCTRL
     /* set pin mode for RTS and CTS pins */
-    GPIO_BASE->DIRSET = (1 << UART_PIN_RTS);
-    GPIO_BASE->DIRCLR = (1 << UART_PIN_CTS);
+    gpio_init(UART_PIN_RTS, GPIO_OUT);
+    gpio_init(UART_PIN_CTS, GPIO_IN);
     /* configure RTS and CTS pins to use */
-    NRF_UART0->PSELRTS = UART_PIN_RTS;
-    NRF_UART0->PSELCTS = UART_PIN_CTS;
+    PSEL_RTS = UART_PIN_RTS;
+    PSEL_CTS = UART_PIN_CTS;
     NRF_UART0->CONFIG |= UART_CONFIG_HWFC_Msk;  /* enable HW flow control */
 #else
-    NRF_UART0->PSELRTS = 0xffffffff;            /* pin disconnected */
-    NRF_UART0->PSELCTS = 0xffffffff;            /* pin disconnected */
+    PSEL_RTS = 0xffffffff;            /* pin disconnected */
+    PSEL_CTS = 0xffffffff;            /* pin disconnected */
 #endif
 
     /* select baudrate */
@@ -122,30 +136,44 @@ int uart_init(uart_t uart, uint32_t baudrate, uart_rx_cb_t rx_cb, void *arg)
             NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud921600;
             break;
         default:
-            return -2;
+            return UART_NOBAUD;
     }
 
     /* enable the UART device */
     NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled;
     /* enable TX and RX */
     NRF_UART0->TASKS_STARTTX = 1;
-    NRF_UART0->TASKS_STARTRX = 1;
-    /* enable global and receiving interrupt */
-    NVIC_EnableIRQ(UART_IRQN);
-    NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
-    return 0;
+
+    if (rx_cb) {
+        NRF_UART0->TASKS_STARTRX = 1;
+        /* enable global and receiving interrupt */
+        NVIC_EnableIRQ(UART_IRQN);
+        NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
+    }
+
+    return UART_OK;
 }
 
 void uart_write(uart_t uart, const uint8_t *data, size_t len)
 {
     if (uart == 0) {
         for (size_t i = 0; i < len; i++) {
+            /* This section of the function is not thread safe:
+                - another thread may mess up with the uart at the same time.
+               In order to avoid an infinite loop in the interrupted thread,
+               the TXRDY flag must be cleared before writing the data to be
+               sent and not after. This way, the higher priority thread will
+               exit this function with the TXRDY flag set, then the interrupted
+               thread may have not transmitted his data but will still exit the
+               while loop.
+            */
+
+            /* reset ready flag */
+            NRF_UART0->EVENTS_TXDRDY = 0;
             /* write data into transmit register */
             NRF_UART0->TXD = data[i];
             /* wait for any transmission to be done */
             while (NRF_UART0->EVENTS_TXDRDY == 0) {}
-            /* reset ready flag */
-            NRF_UART0->EVENTS_TXDRDY = 0;
         }
     }
 }
@@ -170,7 +198,5 @@ void isr_uart0(void)
         uint8_t byte = (uint8_t)(NRF_UART0->RXD & 0xff);
         uart_config.rx_cb(uart_config.arg, byte);
     }
-    if (sched_context_switch_request) {
-        thread_yield();
-    }
+    cortexm_isr_end();
 }
