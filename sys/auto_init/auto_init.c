@@ -92,6 +92,10 @@
 #include "random.h"
 #endif
 
+#ifdef MODULE_GCOAP
+#include "net/gnrc/coap.h"
+#endif
+
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
@@ -165,6 +169,10 @@ void auto_init(void)
     DEBUG("Bootstraping lwIP.\n");
     lwip_bootstrap();
 #endif
+#ifdef MODULE_GCOAP
+    DEBUG("Auto init gcoap module.\n");
+    gcoap_init();
+#endif
 
 /* initialize network devices */
 #ifdef MODULE_AUTO_INIT_GNRC_NETIF
@@ -227,6 +235,11 @@ void auto_init(void)
 #ifdef MODULE_NORDIC_SOFTDEVICE_BLE
     extern void gnrc_nordic_ble_6lowpan_init(void);
     gnrc_nordic_ble_6lowpan_init();
+#endif
+
+#ifdef MODULE_W5100
+    extern void auto_init_w5100(void);
+    auto_init_w5100();
 #endif
 
 #endif /* MODULE_AUTO_INIT_GNRC_NETIF */
