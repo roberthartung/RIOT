@@ -4,8 +4,7 @@
 before_script:
   - echo "Running on ${CI_RUNNER_DESCRIPTION} (#${CI_RUNNER_ID})"
   - apt-get update
-  - apt-get install make wget curl
-
+  - apt-get install --assume-yes make wget curl
 
 cli:
   tags:
