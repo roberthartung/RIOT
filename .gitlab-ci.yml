@@ -10,6 +10,8 @@ cli:
   tags:
     - inga
   script:
+    - export PORT=`python3 -m serial.tools.list_ports -v 2>/dev/null | grep -B 2 'A502C3X3' | head -n 1`
+    - echo $PORT
     - ls -lah /dev/inga/*
     - cd examples/hello-world/ && make PORT=/dev/inga/node-A502C3XN BOARD=inga-red flash
     - cd -
