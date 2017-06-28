@@ -1,8 +1,9 @@
 USEMODULE += inga-common
 
-# Flasher is board dependent!
-export FLASHER = $(RIOTBOARD)/inga-common/tools/inga_tool/inga_tool -d $(PORT) -r && avrdude
-export FFLAGS =-c avr109 -p m1284p -P $(PORT) -b 230400 -u -U flash:w:$(HEXFILE)
+# Flasher is board-dependent!
+#export FLASHER = $(RIOTBOARD)/inga-common/tools/inga_tool/inga_tool -d $(PORT) -r && avrdude
+# New flash tool
+include $(RIOTMAKE)/tools/inga_tool.inc.mk
 
 export INCLUDES += -I$(RIOTBOARD)/inga-common/include/
 
