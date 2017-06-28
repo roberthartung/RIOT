@@ -1,9 +1,10 @@
 #image: docker.io/ibrgvz/docker-ubuntu-ppa-stm32-builder:latest
 
+# wget OR curl should be enough
 before_script:
   - echo "Running on ${CI_RUNNER_DESCRIPTION} (#${CI_RUNNER_ID})"
   - apt-get update
-  - apt-get install make
+  - apt-get install make wget curl
 
 
 cli:
