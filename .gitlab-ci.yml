@@ -8,8 +8,10 @@ before_script:
 
 cli:
   tags:
-    - lab
+    - inga
   script:
-    - cd examples/hello-world/ && make BOARD=inga-white
-    - cd -
-    - cd
+    - ls -lah /dev/inga/*
+    - cd examples/hello-world/ && make BOARD=inga-red flash
+    #- cd -
+    #- cd tests/unittests/
+    #- make BOARD=inga-red
