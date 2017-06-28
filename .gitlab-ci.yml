@@ -14,12 +14,14 @@ cli:
     - make PORT=${PORT} BOARD=inga-red flash
     - make PORT=${PORT} BOARD=inga-red term &
     - PID=$!
-    - ./dist/tools/inga_tool/inga_tool -r -d $(PORT)
+    - echo ${PID}
+    - ../../dist/tools/inga_tool/inga_tool -r -d ${PORT}
     - sleep 5; kill -9 $PID
     - cd -
     - cd tests/unittests/
     - make PORT=${PORT} BOARD=inga-red tests-core flash
     - make PORT=${PORT} BOARD=inga-red term &
     - PID=$!
-    - ./dist/tools/inga_tool/inga_tool -r -d $(PORT)
+    - echo ${PID}
+    - ../../dist/tools/inga_tool/inga_tool -r -d ${PORT}
     - sleep 5; kill -9 $PID
