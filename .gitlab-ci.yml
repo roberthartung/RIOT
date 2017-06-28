@@ -4,10 +4,12 @@
 before_script:
   - echo "Running on ${CI_RUNNER_DESCRIPTION} (#${CI_RUNNER_ID})"
   - apt-get update
-  - apt-get install --assume-yes make curl unzip
+  - apt-get install --assume-yes make curl unzip avr-gcc
 
 cli:
   tags:
     - lab
   script:
     - cd examples/hello-world/ && make BOARD=inga-white
+    - cd -
+    - cd
