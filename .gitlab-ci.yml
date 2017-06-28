@@ -11,7 +11,7 @@ cli:
     - inga
   script:
     - ls -lah /dev/inga/*
-    - cd examples/hello-world/ && make BOARD=inga-red flash
-    #- cd -
-    #- cd tests/unittests/
-    #- make BOARD=inga-red
+    - cd examples/hello-world/ && make PORT=/dev/inga/node-A502C3XN BOARD=inga-red flash
+    - cd -
+    - cd tests/unittests/
+    - make PORT=/dev/inga/node-A502C3XN BOARD=inga-red tests-core flash
