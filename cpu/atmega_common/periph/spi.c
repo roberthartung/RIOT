@@ -57,7 +57,13 @@ void spi_init_pins(spi_t bus)
      * master correctly, though we do not use it for now (as we handle the chip
      * select externally for now)
      */
-    DDRB |= ((1 << DDB2) | (1 << DDB1) | (1 << DDB0));
+    //DDRB |= ((1 << DDB2) | (1 << DDB1) | (1 << DDB0));
+    switch(bus) {
+      case 0 :
+      // INGA: B5 = MOSI, B7=SCK, B4=SS
+        DDRB |= ((1 << DDB5) | (1 << DDB7) | (1 << DDB4));
+      break;
+    }
 }
 
 int spi_acquire(spi_t bus, spi_cs_t cs, spi_mode_t mode, spi_clk_t clk)

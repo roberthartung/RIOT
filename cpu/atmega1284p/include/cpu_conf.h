@@ -39,7 +39,8 @@ extern "C" {
 
 #define THREAD_STACKSIZE_IDLE      (128)
 
-#define ISR_STACKSIZE              (128)
+/// NOT IN NEW BRANCH
+//#define ISR_STACKSIZE              (128)
 /** @} */
 
 #ifdef __cplusplus

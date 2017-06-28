@@ -10,8 +10,6 @@
 #include "cpu.h"
 #include "board.h"
 #include "uart_stdio.h"
-//#include "at86rf2xx.h"
-#include "xtimer.h"
 
 static int uart_putchar(char c, FILE *stream);
 static int uart_getchar(FILE *stream);
@@ -26,12 +24,12 @@ void board_init(void)
 
   /* initialize STDIO over UART */
   uart_stdio_init();
-
   stdout = &uart_stdout;
   stdin = &uart_stdin;
+  puts("\f");
 
-  /* Required for the rf233xx radio */
-  // xtimer_init();
+  /* initialize the CPU */
+  cpu_init();
 
   irq_enable();
 }
