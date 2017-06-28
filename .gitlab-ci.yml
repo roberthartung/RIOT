@@ -1,6 +1,3 @@
-#image: docker.io/ibrgvz/docker-ubuntu-ppa-stm32-builder:latest
-
-# wget OR curl should be enough
 before_script:
   - echo "Running on ${CI_RUNNER_DESCRIPTION} (#${CI_RUNNER_ID})"
   #- apt-get update
@@ -10,10 +7,10 @@ cli:
   tags:
     - inga
   script:
+    - python3 -m serial.tools.list_ports -v
     - export PORT=`python3 -m serial.tools.list_ports -v 2>/dev/null | grep -B 2 'A502C3XN' | head -n 1`
     - echo $PORT
-    - ls -lah /dev/inga/*
-    - cd examples/hello-world/ && make PORT=/dev/inga/node-A502C3XN BOARD=inga-red flash
+    - cd examples/hello-world/ && make PORT=${PORT} BOARD=inga-red flash
     - cd -
     - cd tests/unittests/
-    - make PORT=/dev/inga/node-A502C3XN BOARD=inga-red tests-core flash
+    - make PORT=${PORT} BOARD=inga-red tests-core flash
