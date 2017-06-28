@@ -4,7 +4,7 @@
 before_script:
   - echo "Running on ${CI_RUNNER_DESCRIPTION} (#${CI_RUNNER_ID})"
   - apt-get update
-  - apt-get install --assume-yes make curl unzip avr-gcc
+  - apt-get install --assume-yes make curl unzip avr-libc binutils-avr gcc-avr avrdude
 
 cli:
   tags:
