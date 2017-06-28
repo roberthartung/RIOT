@@ -10,6 +10,11 @@ $(RIOTBASE)/dist/tools/bossa/bossac:
 	@make -C $(RIOTBASE)/dist/tools/bossa
 	@echo "[INFO] bossac binary successfully build!"
 
+$(RIOTBASE)/dist/tools/inga_tool/inga_tool:
+	@echo "[INFO] inga_tool binary not found - building it from source"
+	@make -C $(RIOTBASE)/dist/tools/inga_tool
+	@echo "[INFO] inga_tool binary successfully build!"
+
 $(RIOTBASE)/dist/tools/edbg/edbg:
 	@echo "[INFO] edbg binary not found - building it from source now"
 	CC= CFLAGS= make -C $(RIOTBASE)/dist/tools/edbg

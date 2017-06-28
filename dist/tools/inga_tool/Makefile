@@ -1,6 +1,9 @@
 UNAME := $(shell uname)
 FTDI_VERSION := -1
 
+# this is ugly!
+CC = gcc
+
 ifeq ($(UNAME), Linux)
 # Use pkg-config to determine the compiler and linker flag forlibudev
 LIBUDEV_CFLAGS := `pkg-config --cflags libudev`
