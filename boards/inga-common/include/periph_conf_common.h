@@ -39,7 +39,6 @@ extern "C" {
 #define TIMER_0_FLAG        &TIFR1
 #define TIMER_0_ISRA        TIMER1_COMPA_vect
 #define TIMER_0_ISRB        TIMER1_COMPB_vect
-//#define TIMER_0_ISRC        TIMER1_COMPC_vect
 /** @} */
 
 /**
@@ -59,6 +58,7 @@ extern "C" {
 
 
 #define SPI_NUMOF           (1U)
+/*
 #define SPI_0_EN            (1U)
 #define SPI_1_EN            (1U)
 
@@ -76,20 +76,10 @@ extern "C" {
 #define SPI_0_MOSI_PORT_DIR  DDRB
 #define SPI_0_MOSI_PIN       5
 //#define SPI_0_MOSI_PIN_POS   DDB5
+*/
 
 /** @{ */
 #define MEGA_PRR PRR0
-/** @} */
-
-/**
- * @brief    Xtimer configuration
- * @{
- */
-#define XTIMER_DEV                  (0)
-#define XTIMER_CHAN                 (0)
-#define XTIMER_WIDTH                (16)
-#define XTIMER_BACKOFF              (40)
-#define XTIMER_SHIFT                (0)
 /** @} */
 
 #ifdef __cplusplus

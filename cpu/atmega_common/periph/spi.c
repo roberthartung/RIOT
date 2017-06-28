@@ -123,4 +123,4 @@ int spi_transfer_regs(spi_t dev, uint8_t reg, char *out, char *in, unsigned int 
 {
     spi_transfer_bytes(dev, (char *)&reg, NULL, 1);
     return spi_transfer_bytes(dev, out, in, length);
-}	
+}

@@ -169,9 +169,12 @@ static inline uint8_t pcint_port_pin(volatile uint8_t *reg) {
 /*
  * PCINT0 is always defined, if GPIO_PC_INT_NUMOF is defined
  */
+/// Used for
+#if 0
 ISR(PCINT0_vect) {
   pcint_handler(0, pcint_port_pin(&PCMSK0));
 }
+#endif
 #if defined(PCINT1_vect)
 ISR(PCINT1_vect) {
   pcint_handler(1, pcint_port_pin(&PCMSK1));

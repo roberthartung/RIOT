@@ -1,14 +1,6 @@
 ## the cpu to build for
 export CPU = atmega1284p
 
-export CFLAGS_CPU   = -mmcu=atmega1284p  $(CFLAGS_FPU)
-export CFLAGS_LINK  = -fno-builtin -fshort-enumes
-export CFLAGS_OPT  ?= -Os
-
-export CFLAGS      += $(CFLAGS_CPU) $(CFLAGS_LINK) $(CFLAGS_OPT)
-export ASFLAGS     += $(CFLAGS_CPU)
-export LINKFLAGS   += $(CFLAGS_CPU) $(CFLAGS_OPT)
-
 # flash tool configuration
 export OFLAGS = -j .text -j .data -O ihex
 
@@ -16,4 +8,4 @@ export OFLAGS = -j .text -j .data -O ihex
 PORT_LINUX ?= $(firstword $(sort $(wildcard /dev/ttyUSB*)))
 # setup serial terminal
 export BAUD ?= 19200
-include $(RIOTBOARD)/Makefile.include.serial
+include $(RIOTMAKE)/tools/serial.inc.mk
