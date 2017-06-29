@@ -35,10 +35,9 @@
 
 #include "xtimer.h"
 #include "l3g4200d.h"
-
 #define MODE        L3G4200D_MODE_100_25
 #define SCALE       L3G4200D_SCALE_500DPS
-#define SLEEP       (100 * 1000U)
+#define SLEEP       (100 * 1000UL)
 
 int main(void)
 {
