@@ -34,11 +34,14 @@ extern "C" {
  * @{
  */
 #define TIMER_NUMOF         (1U)
+
 #define TIMER_0             MEGA_TIMER1
 #define TIMER_0_MASK        &TIMSK1
 #define TIMER_0_FLAG        &TIFR1
 #define TIMER_0_ISRA        TIMER1_COMPA_vect
 #define TIMER_0_ISRB        TIMER1_COMPB_vect
+// #define TIMER_0_ISRC        TIMER1_COMPOVF
+// #define TIMER_0_ISRD        TIMER1_COMPCAPT
 /** @} */
 
 /**

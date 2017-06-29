@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-#define UART_STDIO_BAUDRATE (19200)
+#define UART_STDIO_BAUDRATE               (19200)
 
 /**
  ** Context swap defines
@@ -25,8 +25,8 @@ extern "C" {
             PCICR |= (1 << PCIE0/*PCIE1*/); \
           /*PCMSK1*/PCMSK0 |= (1 << PCINT0/*PCINT14*/); \
 } while (0)
-#define AVR_CONTEXT_SWAP_INTERRUPT_VECT  PCINT0_vect
-#define AVR_CONTEXT_SWAP_TRIGGER   PORTA ^= (1 << PA0)
+#define AVR_CONTEXT_SWAP_INTERRUPT_VECT   PCINT0_vect
+#define AVR_CONTEXT_SWAP_TRIGGER          PORTA ^= (1 << PA0)
 
 #define AT86RF2XX_PARAMS_BOARD {.spi = SPI_DEV(0), \
                                 .spi_clk = SPI_CLK_5MHZ, \
@@ -39,10 +39,10 @@ extern "C" {
  * @name    xtimer configuration values
  * @{
  */
-#define XTIMER_WIDTH                (16)
-#define XTIMER_BACKOFF              (40)
-#define XTIMER_DEV                  (0)
-#define XTIMER_CHAN                 (0)
+#define XTIMER_WIDTH                      (16)
+#define XTIMER_BACKOFF                    (40)
+#define XTIMER_DEV                        (0)
+#define XTIMER_CHAN                       (0)
 /** @} */
 
 #ifdef __cplusplus
