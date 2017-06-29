@@ -56,6 +56,23 @@ extern "C" {
 #define UART_0_ISR          USART0_RX_vect
 /** @} */
 
+/**
+ * The INGA has exactly 1 I2C interface
+ * @{
+*/
+#define I2C_NUMOF           (1U)
+#define I2C_0_EN            (1)
+#define I2C_0_SCL           GPIO_PIN(PORT_C, 0)
+#define I2C_0_SDA           GPIO_PIN(PORT_C, 1)
+/** @} */
+
+#define ADXL345_PARAM_ADDR  (0xA6)
+#define ADXL345_PARAM_I2C   (0) // Device 0
+
+#define ADXL345_PARAMS              { .offset = ADXL345_PARAM_OFFSET,    \
+                                      .range  = ADXL345_RANGE_2G,     \
+                                      .rate   = ADXL345_RATE_100HZ,      \
+                                      .full_res = ADXL345_PARAM_FULL_RES }
 
 #define SPI_NUMOF           (1U)
 /*
