@@ -241,7 +241,7 @@ static int _read_up(bmp180_t *dev, int32_t *output)
         return -1;
     }
 
-    *output = ((up[0] << 16) | (up[1] << 8) | up[2]) >> (8 - dev->oversampling);
+    *output = (((int32_t)up[0] << 16) | (up[1] << 8) | up[2]) >> (8 - dev->oversampling);
 
     DEBUG("UP: %i\n", (int)*output);
 
@@ -251,8 +251,8 @@ static int _read_up(bmp180_t *dev, int32_t *output)
 static int _compute_b5(bmp180_t *dev, int32_t ut, int32_t *output)
 {
     int32_t x1, x2;
-    x1 = (ut - dev->calibration.ac6) * dev->calibration.ac5 >> 15;
-    x2 = (dev->calibration.mc << 11) / (x1 + dev->calibration.md);
+    x1 = (ut - (int32_t)dev->calibration.ac6) * (int32_t)dev->calibration.ac5 >> 15;
+    x2 = ((int32_t)dev->calibration.mc << 11) / (x1 + dev->calibration.md);
 
     *output = x1 + x2;
 
