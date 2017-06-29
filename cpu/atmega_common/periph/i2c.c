@@ -111,13 +111,12 @@ int i2c_release(i2c_t dev)
 
 int i2c_read_byte(i2c_t dev, uint8_t address, void *data)
 {
-    DEBUG("i2c.c: i2c_read_byte\n");
     return i2c_read_bytes(dev, address, data, 1);
 }
 
 int i2c_read_bytes(i2c_t dev, uint8_t address, void *data, int length)
 {
-  DEBUG("i2c.c: i2c_read_bytes: %d %02X %d\n", dev, address, length);
+  DEBUG("i2c.c: i2c_read_bytes: a=0x%02X l=%d\n", address, length);
     /* start transmission and send slave address */
     if (_start(dev, address, I2C_FLAG_READ, 0) < 0) {
         DEBUG("_start failed\n");
@@ -135,13 +134,12 @@ int i2c_read_bytes(i2c_t dev, uint8_t address, void *data, int length)
 
 int i2c_read_reg(i2c_t dev, uint8_t address, uint8_t reg, void *data)
 {
-    DEBUG("i2c.c: i2c_read_reg\n");
     return i2c_read_regs(dev, address, reg, data, 1);
 }
 
 int i2c_read_regs(i2c_t dev, uint8_t address, uint8_t reg, void *data, int length)
 {
-  DEBUG("i2c.c: i2c_read_regs: %d 0x%02X 0x%02X %d\n", dev, address, reg, length);
+  DEBUG("i2c.c: i2c_read_regs: a=0x%02X r=0x%02X l=%d\n", address, reg, length);
     /* start transmission and send slave address */
     if (_start(dev, address, I2C_FLAG_WRITE, 0) < 0) {
         DEBUG("_start failed\n");
@@ -171,13 +169,12 @@ int i2c_read_regs(i2c_t dev, uint8_t address, uint8_t reg, void *data, int lengt
 
 int i2c_write_byte(i2c_t dev, uint8_t address, uint8_t data)
 {
-  DEBUG("i2c.c: i2c_write_byte\n");
     return i2c_write_bytes(dev, address, &data, 1);
 }
 
 int i2c_write_bytes(i2c_t dev, uint8_t address, const void *data, int length)
 {
-  DEBUG("i2c.c: i2c_write_bytes: %d %02X %d\n", dev, address, length);
+  DEBUG("i2c.c: i2c_write_bytes: a=0x%02X l=%d\n", address, length);
 
     if (_start(dev, address, I2C_FLAG_WRITE, 0) < 0) {
         DEBUG("_start failed\n");
@@ -193,13 +190,12 @@ int i2c_write_bytes(i2c_t dev, uint8_t address, const void *data, int length)
 
 int i2c_write_reg(i2c_t dev, uint8_t address, uint8_t reg, uint8_t data)
 {
-  DEBUG("i2c.c: i2c_write_reg: %d %02X\n", dev, address);
     return i2c_write_regs(dev, address, reg, &data, 1);
 }
 
 int i2c_write_regs(i2c_t dev, uint8_t address, uint8_t reg, const void *data, int length)
 {
-    DEBUG("i2c.c: i2c_write_regs: %d %02X\n", dev, address);
+    DEBUG("i2c.c: i2c_write_regs: a=%02X r=%02X l=%d\n", address, reg, length);
     /* start transmission and send slave address */
     if (_start(dev, address, I2C_FLAG_WRITE, 0) < 0) {
       DEBUG("_start failed\n");
@@ -221,7 +217,6 @@ int i2c_write_regs(i2c_t dev, uint8_t address, uint8_t reg, const void *data, in
 }
 
 static int8_t _start(i2c_t dev, uint8_t addr, uint8_t rw_flag, uint8_t rep) {
-  DEBUG("i2c.c: _start: %d %02X %d %d\n", dev, addr, rw_flag, rep);
   uint16_t i = 0;
 
   //MEGA_PRR &= ~(1 << PRTWI);
@@ -239,6 +234,7 @@ static int8_t _start(i2c_t dev, uint8_t addr, uint8_t rw_flag, uint8_t rep) {
   }
 
   TWDR = addr | rw_flag;
+  DEBUG("i2c.c: _start: 0x%02X rep=%d\n", TWDR, rep);
   TWCR = (1 << TWINT) | (1 << TWEN);
   i = 0;
 
@@ -275,13 +271,11 @@ static void _stop(i2c_t dev) {
 }
 
 static inline int8_t _write_bytes(i2c_t dev, const uint8_t *data, int length) {
-  DEBUG("i2c.c: _write_bytes: %d %d\n", dev, length);
   uint16_t tmp_data_length = length;
   uint16_t buffer_counter = 0;
   while(tmp_data_length--) {
     int8_t ret = _write(dev, data[buffer_counter++]);
     if(ret != 0) {
-      DEBUG("_write_bytes: Unable to write byte %d", buffer_counter);
       return ret;
     }
   }
@@ -289,7 +283,7 @@ static inline int8_t _write_bytes(i2c_t dev, const uint8_t *data, int length) {
 }
 
 static inline int8_t _write(i2c_t dev, uint8_t data) {
-  DEBUG("i2c.c: _write: %d 0x%02X\n", dev, data);
+  DEBUG("i2c.c: _write: 0x%02X\n", data);
   uint16_t i = 0;
 
   TWDR = data;
@@ -297,12 +291,13 @@ static inline int8_t _write(i2c_t dev, uint8_t data) {
 
   while (!(TWCR & (1 << TWINT))) {
     if( i++ > 800 ) {
+      DEBUG("i2c.c: _write: Timeout\n");
       return -2;
     }
   }
 
   if ((TWSR & 0xF8) != I2C_MT_DATA_ACK) {
-    DEBUG("_write: ACK expected.\n");
+    DEBUG("i2c.c: _write: ACK expected\n");
     return -1;
   }
 
@@ -310,7 +305,6 @@ static inline int8_t _write(i2c_t dev, uint8_t data) {
 }
 
 static inline int8_t _read_bytes(i2c_t dev, uint8_t *data, int length) {
-  DEBUG("i2c.c: _read_bytes: %d %d\n", dev, length);
   uint16_t tmp_data_length = length;
   uint16_t buffer_counter = 0;
   while(tmp_data_length-- > 0) {
@@ -318,7 +312,6 @@ static inline int8_t _read_bytes(i2c_t dev, uint8_t *data, int length) {
     uint8_t ack = tmp_data_length == 0 ? 0 : 1;
     int8_t ret = _read(dev, &data[buffer_counter++], ack);
     if(ret != 0) {
-      DEBUG("Unable to _read byte (%d / %d)\n", ret, ack);
       return ret;
     }
   }
@@ -326,19 +319,19 @@ static inline int8_t _read_bytes(i2c_t dev, uint8_t *data, int length) {
 }
 
 static inline int8_t _read(i2c_t dev, uint8_t *data, uint8_t ack) {
-  DEBUG("i2c.c: _read: %d %d\n", dev, ack);
   uint16_t i = 0;
   TWCR = (1 << TWINT) | (1 << TWEN) | (ack ? (1 << TWEA) : 0);
   while (!(TWCR & (1 << TWINT))) {
     if (i++ > 800) {
+      DEBUG("_read: Timeout Error\n");
       return -1;
     }
   }
   if ((TWSR & 0xF8) != (ack ? I2C_MR_DATA_ACK : I2C_MR_DATA_NACK)) {
-    DEBUG("_read: TWSR=%02X\n", TWSR);
+    DEBUG("_read: ACK/NACK Error\n");
     return -2;
   }
-  DEBUG("TWDR: %02X\n", TWDR);
+  DEBUG("i2c.c: _read 0x%02X ack=%d\n", TWDR, ack);
   *data = TWDR;
   return 0;
 }
