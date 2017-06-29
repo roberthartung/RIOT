@@ -6,9 +6,9 @@ export CFLAGS_LINK  = -ffunction-sections -fdata-sections -fno-builtin -fshort-e
 export CFLAGS_DBG  ?= -ggdb -g3
 export CFLAGS_OPT  ?= -Os
 
-export CFLAGS += $(CFLAGS_CPU) $(CFLAGS_LINK) $(CFLAGS_DBG) $(CFLAGS_OPT)
+export CFLAGS += $(CFLAGS_CPU) $(CFLAGS_LINK) $(CFLAGS_DBG) $(CFLAGS_OPT) -Wl,-u,vfprintf -lprintf_flt -lm
 export ASFLAGS += $(CFLAGS_CPU) $(CFLAGS_DBG)
-export LINKFLAGS += $(CFLAGS_CPU) $(CFLAGS_DBG) $(CFLAGS_OPT) -static -lgcc -e reset_handler -Wl,--gc-sections
+export LINKFLAGS += $(CFLAGS_CPU) $(CFLAGS_DBG) $(CFLAGS_OPT) -static -lgcc -e reset_handler -Wl,--gc-sections,-u,vfprintf -lprintf_flt -lm
 
 # export the peripheral drivers to be linked into the final binary
 export USEMODULE += periph
