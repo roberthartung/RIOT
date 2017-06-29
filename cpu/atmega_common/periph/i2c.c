@@ -233,7 +233,7 @@ static int8_t _start(i2c_t dev, uint8_t addr, uint8_t rw_flag, uint8_t rep) {
     return -1;
   }
 
-  TWDR = addr | rw_flag;
+  TWDR = (addr<<1) | rw_flag;
   DEBUG("i2c.c: _start: 0x%02X rep=%d\n", TWDR, rep);
   TWCR = (1 << TWINT) | (1 << TWEN);
   i = 0;
