@@ -37,7 +37,7 @@
 #include "xtimer.h"
 #include "board.h"
 
-#define SLEEP_2S   (2 * 1000 * 1000u) /* 2 seconds delay between printf */
+#define SLEEP_2S   (2 * 1000 * 1000ul) /* 2 seconds delay between printf */
 
 int main(void)
 {
