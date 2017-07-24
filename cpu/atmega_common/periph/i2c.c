@@ -57,11 +57,6 @@ static mutex_t locks[] = {
 
 int i2c_init_master(i2c_t dev, i2c_speed_t speed)
 {
-  //gpio_t pin_scl = 0;
-  //gpio_t pin_sda = 0;
-
-  DEBUG("i2c.c: init_master\n");
-
   /// DISABLE I2C MASTER
   i2c_poweroff(dev);
 
@@ -91,7 +86,6 @@ int i2c_init_master(i2c_t dev, i2c_speed_t speed)
 
 int i2c_acquire(i2c_t dev)
 {
-    DEBUG("i2c.c: i2c_acquire\n");
     if (dev >= I2C_NUMOF) {
         return -1;
     }
@@ -101,7 +95,6 @@ int i2c_acquire(i2c_t dev)
 
 int i2c_release(i2c_t dev)
 {
-    DEBUG("i2c.c: i2c_release\n");
     if (dev >= I2C_NUMOF) {
         return -1;
     }
@@ -116,7 +109,7 @@ int i2c_read_byte(i2c_t dev, uint8_t address, void *data)
 
 int i2c_read_bytes(i2c_t dev, uint8_t address, void *data, int length)
 {
-  DEBUG("i2c.c: i2c_read_bytes: a=0x%02X l=%d\n", address, length);
+  //DEBUG("i2c.c: i2c_read_bytes: a=0x%02X l=%d\n", address, length);
     /* start transmission and send slave address */
     if (_start(dev, address, I2C_FLAG_READ, 0) < 0) {
         DEBUG("_start failed\n");
@@ -139,7 +132,7 @@ int i2c_read_reg(i2c_t dev, uint8_t address, uint8_t reg, void *data)
 
 int i2c_read_regs(i2c_t dev, uint8_t address, uint8_t reg, void *data, int length)
 {
-  DEBUG("i2c.c: i2c_read_regs: a=0x%02X r=0x%02X l=%d\n", address, reg, length);
+  //DEBUG("i2c.c: i2c_read_regs: a=0x%02X r=0x%02X l=%d\n", address, reg, length);
     /* start transmission and send slave address */
     if (_start(dev, address, I2C_FLAG_WRITE, 0) < 0) {
         DEBUG("_start failed\n");
@@ -174,7 +167,7 @@ int i2c_write_byte(i2c_t dev, uint8_t address, uint8_t data)
 
 int i2c_write_bytes(i2c_t dev, uint8_t address, const void *data, int length)
 {
-  DEBUG("i2c.c: i2c_write_bytes: a=0x%02X l=%d\n", address, length);
+  //DEBUG("i2c.c: i2c_write_bytes: a=0x%02X l=%d\n", address, length);
 
     if (_start(dev, address, I2C_FLAG_WRITE, 0) < 0) {
         DEBUG("_start failed\n");
@@ -195,7 +188,7 @@ int i2c_write_reg(i2c_t dev, uint8_t address, uint8_t reg, uint8_t data)
 
 int i2c_write_regs(i2c_t dev, uint8_t address, uint8_t reg, const void *data, int length)
 {
-    DEBUG("i2c.c: i2c_write_regs: a=%02X r=%02X l=%d\n", address, reg, length);
+    //DEBUG("i2c.c: i2c_write_regs: a=%02X r=%02X l=%d\n", address, reg, length);
     /* start transmission and send slave address */
     if (_start(dev, address, I2C_FLAG_WRITE, 0) < 0) {
       DEBUG("_start failed\n");
@@ -234,7 +227,7 @@ static int8_t _start(i2c_t dev, uint8_t addr, uint8_t rw_flag, uint8_t rep) {
   }
 
   TWDR = (addr<<1) | rw_flag;
-  DEBUG("i2c.c: _start: 0x%02X rep=%d\n", TWDR, rep);
+  //DEBUG("i2c.c: _start: 0x%02X rep=%d\n", TWDR, rep);
   TWCR = (1 << TWINT) | (1 << TWEN);
   i = 0;
 
@@ -252,12 +245,13 @@ static int8_t _start(i2c_t dev, uint8_t addr, uint8_t rw_flag, uint8_t rep) {
 }
 
 static void _stop(i2c_t dev) {
-  DEBUG("i2c.c: _stop\n");
+  //DEBUG("i2c.c: _stop\n");
   uint16_t i = 0;
 
   TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);
   while (TWCR & (1 << TWSTO)) {
     if (i++ > 800) {
+      DEBUG("i2c.c: _stop timeout ERROR\n");
       return;
     }
   }
@@ -283,7 +277,7 @@ static inline int8_t _write_bytes(i2c_t dev, const uint8_t *data, int length) {
 }
 
 static inline int8_t _write(i2c_t dev, uint8_t data) {
-  DEBUG("i2c.c: _write: 0x%02X\n", data);
+  //DEBUG("i2c.c: _write: 0x%02X\n", data);
   uint16_t i = 0;
 
   TWDR = data;
@@ -331,7 +325,7 @@ static inline int8_t _read(i2c_t dev, uint8_t *data, uint8_t ack) {
     DEBUG("_read: ACK/NACK Error\n");
     return -2;
   }
-  DEBUG("i2c.c: _read 0x%02X ack=%d\n", TWDR, ack);
+  //DEBUG("i2c.c: _read 0x%02X ack=%d\n", TWDR, ack);
   *data = TWDR;
   return 0;
 }
