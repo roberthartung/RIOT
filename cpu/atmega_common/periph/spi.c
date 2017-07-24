@@ -116,14 +116,18 @@ void spi_transfer_bytes(spi_t bus, spi_cs_t cs, bool cont,
     }
 }
 
-int spi_transfer_reg(spi_t dev, uint8_t reg, char out, char *in)
+/*
+uint8_t spi_transfer_reg(spi_t bus, spi_cs_t cs, uint8_t reg, uint8_t out)
 {
-    spi_transfer_bytes(dev, (char *)&reg, NULL, 1);
-    return spi_transfer_bytes(dev, &out, in, 1);
+    uint8_t in;
+    spi_transfer_bytes(bus, cs, true, &reg, NULL, 1);
+    spi_transfer_bytes(bus, cs, false, &out, &in, 1);
+    return in;
 }
 
-int spi_transfer_regs(spi_t dev, uint8_t reg, char *out, char *in, unsigned int length)
+void spi_transfer_regs(spi_t bus, spi_cs_t cs, uint8_t reg, const void *out, void *in, size_t length)
 {
-    spi_transfer_bytes(dev, (char *)&reg, NULL, 1);
-    return spi_transfer_bytes(dev, out, in, length);
+    spi_transfer_bytes(bus, cs, true, &reg, NULL, 1);
+    spi_transfer_bytes(bus, cs, false, out, in, length);
 }
+*/
