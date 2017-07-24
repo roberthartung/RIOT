@@ -264,7 +264,6 @@ void NORETURN __enter_thread_mode(void)
 }
 
 void thread_arch_yield(void) {
-  printf("thread_arch_yield()\n");
   AVR_CONTEXT_SWAP_TRIGGER;
 }
 
