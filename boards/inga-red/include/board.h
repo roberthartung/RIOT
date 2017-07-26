@@ -11,7 +11,8 @@
 
 #include "cpu.h"
 #include "periph_conf.h"
-
+/* For GPIO_IN */
+#include "periph/gpio.h"
 #include "board_common.h"
 
 #ifdef __cplusplus
@@ -19,6 +20,9 @@ extern "C" {
 #endif
 
 /* Not yet any specific board configurations */
+
+#define BTN0_PIN            GPIO_PIN(1,2) //PB2
+#define BTN0_MODE           GPIO_IN
 
 #ifdef __cplusplus
 }
