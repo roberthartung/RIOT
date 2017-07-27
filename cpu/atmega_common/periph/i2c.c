@@ -26,6 +26,10 @@
 #define ENABLE_DEBUG    (0)
 #include "debug.h"
 
+#ifdef MODULE_PM_LAYERED
+#include "pm_layered.h"
+#endif
+
 #define I2C_START        0x08
 #define I2C_REP_START    0x10
 #define I2C_MT_SLA_ACK   0x18
@@ -58,7 +62,7 @@ static mutex_t locks[] = {
 int i2c_init_master(i2c_t dev, i2c_speed_t speed)
 {
   /// DISABLE I2C MASTER
-  i2c_poweroff(dev);
+  //i2c_poweroff(dev);
 
   /// Resets the I2C prescaler
   TWSR &= ~((1 << TWPS1) | (1 << TWPS0));
@@ -212,7 +216,6 @@ int i2c_write_regs(i2c_t dev, uint8_t address, uint8_t reg, const void *data, in
 static int8_t _start(i2c_t dev, uint8_t addr, uint8_t rw_flag, uint8_t rep) {
   uint16_t i = 0;
 
-  //MEGA_PRR &= ~(1 << PRTWI);
   TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
   while (!(TWCR & (1 << TWINT))) {
     if( i++ > 800 ) {
@@ -258,8 +261,6 @@ static void _stop(i2c_t dev) {
 
   TWCR &= ~(1 << TWEN);
 
-  //MEGA_PRR |= (1 << PRTWI);
-  /// TODO(rh): PINS
   DDRC &= ~((1 << PC0) | (1 << PC1));
   PORTC |= ((1 << PC0) | (1 << PC1));
 }
@@ -331,11 +332,18 @@ static inline int8_t _read(i2c_t dev, uint8_t *data, uint8_t ack) {
 }
 
 void i2c_poweron(i2c_t dev) {
-  MEGA_PRR &= ~(1 << PRTWI);
+#ifdef MODULE_PM_LAYERED
+  pm_block(PM_SLEEPMODE_INVALID_TWI);
+#endif
+  power_twi_enable();
 }
 
 void i2c_poweroff(i2c_t dev) {
-  MEGA_PRR |= (1 << PRTWI);
+    puts("i2c_poweroff");
+  power_twi_disable();
+  #ifdef MODULE_PM_LAYERED
+  pm_unblock(PM_SLEEPMODE_INVALID_TWI);
+#endif
 }
 
 #endif /* I2C_NUMOF */
