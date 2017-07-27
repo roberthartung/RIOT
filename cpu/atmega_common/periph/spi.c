@@ -100,7 +100,7 @@ int spi_acquire(spi_t bus, spi_cs_t cs, spi_mode_t mode, spi_clk_t clk)
     /* configure as master, with given mode and clock */
     SPSR = (clk >> S2X_SHIFT);
     SPCR = ((1 << SPE) | (1 << MSTR) | mode | (clk & CLK_MASK));
-    SPCR |= (1 << SPE);
+    //SPCR |= (1 << SPE);
 
     /* clear interrupt flag by reading SPSR and data register by reading SPDR */
     (void)SPSR;
