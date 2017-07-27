@@ -11,7 +11,6 @@ export ASFLAGS += $(CFLAGS_CPU) $(CFLAGS_DBG)
 export LINKFLAGS += $(CFLAGS_CPU) $(CFLAGS_DBG) $(CFLAGS_OPT) -static -lgcc -e reset_handler -Wl,--gc-sections,-u,vfprintf -lprintf_flt -lm
 
 # export the peripheral drivers to be linked into the final binary
-export USEMODULE += periph
 export USEMODULE += periph_common
 export USEMODULE += atmega_common_periph
 
