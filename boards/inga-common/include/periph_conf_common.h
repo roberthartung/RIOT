@@ -108,10 +108,6 @@ extern "C" {
 //#define SPI_0_MOSI_PIN_POS   DDB5
 */
 
-/** @{ */
-#define MEGA_PRR PRR0
-/** @} */
-
 #ifdef __cplusplus
 }
 #endif
