@@ -19,8 +19,8 @@ static FILE uart_stdin = FDEV_SETUP_STREAM(NULL, uart_getchar, _FDEV_SETUP_READ)
 
 void board_init(void)
 {
-  // Disable watchdog
-  WDTCSR &= ~_BV(WDIE);
+  /* initialize the CPU */
+  cpu_init();
 
   /* initialize STDIO over UART */
   uart_stdio_init();
@@ -28,8 +28,9 @@ void board_init(void)
   stdin = &uart_stdin;
   puts("\f");
 
-  /* initialize the CPU */
-  cpu_init();
+#ifdef BTN0_PIN
+   gpio_init(BTN0_PIN, GPIO_IN);
+#endif
 
   irq_enable();
 }
