@@ -40,6 +40,14 @@ extern "C" {
 #define TIMER_0_FLAG        &TIFR1
 #define TIMER_0_ISRA        TIMER1_COMPA_vect
 #define TIMER_0_ISRB        TIMER1_COMPB_vect
+
+/*
+#define TIMER_1             MEGA_TIMER2
+#define TIMER_1_MASK        &TIMSK2
+#define TIMER_1_FLAG        &TIFR2
+#define TIMER_1_ISRA        TIMER2_COMPA_vect
+#define TIMER_1_ISRB        TIMER2_COMPB_vect
+*/
 // #define TIMER_0_ISRC        TIMER1_COMPOVF
 // #define TIMER_0_ISRD        TIMER1_COMPCAPT
 /** @} */

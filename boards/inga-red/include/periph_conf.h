@@ -27,7 +27,9 @@
 extern "C" {
 #endif
 
-/* not yet any specific periph configurations! */
+#define RTT_NUMOF        1
+#define RTT_FREQUENCY    1
+#define RTT_MAX_VALUE    (0xff) // ?
 
 #ifdef __cplusplus
 }

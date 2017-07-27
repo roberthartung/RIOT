@@ -1,1 +1,3 @@
+FEATURES_PROVIDED = periph_rtt
+
 include $(RIOTBOARD)/inga-common/Makefile.features
