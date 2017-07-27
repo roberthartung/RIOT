@@ -25,6 +25,30 @@ extern "C" {
 
 #include "periph_cpu_common.h"
 
+#define PM_NUM_MODES (6)
+
+enum pm_sleep_modes {
+    PM_SLEEPMODE_PWR_DOWN    = 0,
+    PM_SLEEPMODE_STANDBY     = 1,
+    PM_SLEEPMODE_PWR_SAVE    = 2,
+    PM_SLEEPMODE_EXT_STANDBY = 3,
+    PM_SLEEPMODE_ADC         = 4,
+    PM_SLEEPMODE_IDLE        = 5,
+};
+
+/// The level where the SPI cannot operate anymore
+#define PM_SLEEPMODE_INVALID_TWI     PM_SLEEPMODE_ADC
+#define PM_SLEEPMODE_INVALID_SPI     PM_SLEEPMODE_ADC
+#define PM_SLEEPMODE_INVALID_UART0   PM_SLEEPMODE_ADC
+#define PM_SLEEPMODE_INVALID_UART1   PM_SLEEPMODE_ADC
+#define PM_SLEEPMODE_INVALID_TIMER0  PM_SLEEPMODE_ADC
+#define PM_SLEEPMODE_INVALID_TIMER1  PM_SLEEPMODE_ADC
+#define PM_SLEEPMODE_INVALID_TIMER2  PM_SLEEPMODE_STANDBY
+#define PM_SLEEPMODE_INVALID_TIMER3  PM_SLEEPMODE_ADC
+//#define PM_SLEEPMODE_INVALID_RTC     PM_SLEEPMODE_PWR_DOWN
+/* Watchdog is always running! not defining a level here will  */
+//#define PM_SLEEPMODE_INVALID_WDT
+
 /**
  * @brief   Available ports on the ATmega1281 family
  */
