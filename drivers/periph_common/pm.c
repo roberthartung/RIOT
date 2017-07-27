@@ -24,10 +24,14 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-void __attribute__((weak)) pm_set_lowest(void) {}
+#ifndef MODULE_PM_LAYERED
+void pm_set_lowest(void) { }
 
-void __attribute__((weak)) pm_off(void)
+void pm_off(void)
 {
     irq_disable();
     while(1) {};
 }
+#else
+/* #warning Using pm_layered instead of periph_common/pm.c */
+#endif

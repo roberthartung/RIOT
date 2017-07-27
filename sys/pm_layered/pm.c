@@ -87,7 +87,7 @@ void pm_unblock(unsigned mode)
     irq_restore(state);
 }
 
-void __attribute__((weak)) pm_off(void)
+void pm_off(void)
 {
     pm_blocker.val_u32 = 0;
     pm_set_lowest();
