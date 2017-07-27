@@ -34,6 +34,7 @@
 #define I2C_MR_DATA_ACK  0x50
 #define I2C_MR_DATA_NACK 0x58
 
+#if I2C_NUMOF
 static int8_t _start(i2c_t dev, uint8_t addr, uint8_t rw_flag, uint8_t rep);
 static void _stop(i2c_t dev);
 static inline int8_t _write(i2c_t dev, uint8_t data);
@@ -42,7 +43,6 @@ static inline int8_t _read(i2c_t dev, uint8_t *data, uint8_t ack);
 static inline int8_t _read_bytes(i2c_t dev, uint8_t *data, int length);
 
 /* guard file in case no I2C device is defined */
-#if I2C_NUMOF
 /**
  * @brief Array holding one pre-initialized mutex for each I2C device
  */
