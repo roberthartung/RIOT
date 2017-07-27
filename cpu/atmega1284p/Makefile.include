@@ -2,6 +2,7 @@
 export CFLAGS += -DCOREIF_NG=1
 
 # tell the build system that the CPU depends on the atmega common files
+USEMODULE += periph
 USEMODULE += atmega_common
 USEMODULE += pm_layered
 USEMODUOE += periph_rtt
