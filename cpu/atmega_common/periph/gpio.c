@@ -219,10 +219,12 @@ int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
                PCMSK2 |= (1 << pin_num);
                PCICR |= (1 << PCIE2);
              break;
+#ifdef PCIE3
              case 3 :
                PCMSK3 |= (1 << pin_num);
                PCICR |= (1 << PCIE3);
              break;
+#endif
            }
 
            DEBUG("gpio.c: pcint for port: %u, pin: %u, mode: %u\n", port_num, pin_num, mode);
