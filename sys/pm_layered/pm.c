@@ -29,16 +29,29 @@
 #error PM_NUM_MODES must be defined in periph_cpu.h!
 #endif
 
+#if PM_NUM_MODES > 8
+  #error pm_layer does not work for more than 4 modes
+#elif PM_NUM_MODES > 4
+  #ifndef CPU_ATMEGA1284P
+    #error More than 4 modes are efficient and should be avoided. Change number of modes or add define here
+  #endif
+#endif
+
 #ifndef PM_BLOCKER_INITIAL
-#define PM_BLOCKER_INITIAL { .val_u32 = 0 }
+  #define PM_BLOCKER_INITIAL { .val = 0 }
 #endif
 
 /**
  * @brief Power Management mode typedef
  */
 typedef union {
-    uint32_t val_u32;
-    uint8_t val_u8[PM_NUM_MODES];
+#if PM_NUM_MODES > 4
+    uint64_t val;
+    uint8_t val_u8[8];
+#else
+    uint32_t val;
+    uint8_t val_u8[4];
+#endif
 } pm_blocker_t;
 
 /**
@@ -59,7 +72,7 @@ void pm_set_lowest(void)
 
     /* set lowest mode if blocker is still the same */
     unsigned state = irq_disable();
-    if (blocker.val_u32 == pm_blocker.val_u32) {
+    if (blocker.val == pm_blocker.val) {
         DEBUG("pm: setting mode %u\n", mode);
         pm_set(mode);
     }
@@ -89,7 +102,7 @@ void pm_unblock(unsigned mode)
 
 void __attribute__((weak)) pm_off(void)
 {
-    pm_blocker.val_u32 = 0;
+    pm_blocker.val = 0;
     pm_set_lowest();
     while(1);
 }
