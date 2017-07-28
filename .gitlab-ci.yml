@@ -25,3 +25,12 @@ cli:
     #- echo ${PID}
     #- ../../dist/tools/inga_tool/inga_tool -r -d ${PORT}
     #- sleep 5; kill -9 $PID
+buildtest:
+  tags:
+    - lab
+    - docker
+  script:
+    - apt-get update
+    - apt-get install --assume-yes make curl unzip avr-libc binutils-avr gcc-avr avrdude
+    - cd examples/hello-world/
+    - make buildtest
