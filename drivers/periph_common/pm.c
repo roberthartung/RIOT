@@ -24,14 +24,14 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-#if !defined( MODULE_PM_LAYERED ) && !defined( CPU_X86 )
+#if !defined( MODULE_PM_LAYERED )
 void pm_set_lowest(void) { }
+#endif
 
+#if !defined( MODULE_PM_LAYERED ) && !defined( CPU_X86 )
 void pm_off(void)
 {
     irq_disable();
     while(1) {};
 }
-#else
-/* #warning Using pm_layered instead of periph_common/pm.c */
 #endif
