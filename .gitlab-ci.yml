@@ -40,7 +40,7 @@ build-qemu:
   image: riot/riotbuild
   script:
     - cd examples/hello-world/
-    - make BOARD=qemu-i386 buildtest
+    - make BOARD=qemu-i386
 
 build-waspmote-pro:
   tags:
@@ -48,4 +48,4 @@ build-waspmote-pro:
   image: riot/riotbuild
   script:
     - cd examples/hello-world/
-    - make BOARD=waspmote-pro buildtest
+    - make BOARD=waspmote-pro
