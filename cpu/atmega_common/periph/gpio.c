@@ -170,27 +170,33 @@ static inline uint8_t pcint_port_pin(volatile uint8_t *reg) {
  * PCINT0 is always defined, if GPIO_PC_INT_NUMOF is defined
  */
 /// Used for
-#if 0
+#if PCINT0_vect != AVR_CONTEXT_SWAP_INTERRUPT_VECT
 ISR(PCINT0_vect) {
   pcint_handler(0, pcint_port_pin(&PCMSK0));
 }
-#endif
+#endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #if defined(PCINT1_vect)
+#if PCINT1_vect != AVR_CONTEXT_SWAP_INTERRUPT_VECT
 ISR(PCINT1_vect) {
   pcint_handler(1, pcint_port_pin(&PCMSK1));
 }
+#endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif /* PCINT1_vect */
 #if defined(PCINT2_vect)
+#if PCINT2_vect != AVR_CONTEXT_SWAP_INTERRUPT_VECT
 ISR(PCINT2_vect) {
   pcint_handler(2, pcint_port_pin(&PCMSK2));
 }
+#endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif /* PCINT2_vect */
 #if defined(PCINT3_vect)
+#if PCINT3_vect != AVR_CONTEXT_SWAP_INTERRUPT_VECT
 ISR(PCINT3_vect) {
   // DEBUG("PCINT3_vect %u\n", pcint_port_pin(&PCMSK3));
   pcint_handler(3, pcint_port_pin(&PCMSK3)); // pcint_port_pin(&PCMSK3)
   // radio_cb(radio_arg);
 }
+#endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif /* PCINT3_vect */
 #endif /* GPIO_PC_INT_NUMOF */
 
@@ -215,10 +221,12 @@ int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
                PCMSK1 |= (1 << pin_num);
                PCICR |= (1 << PCIE1);
              break;
-             case 2 :
+#ifdef PCIE2
+	     case 2 :
                PCMSK2 |= (1 << pin_num);
                PCICR |= (1 << PCIE2);
              break;
+#endif
 #ifdef PCIE3
              case 3 :
                PCMSK3 |= (1 << pin_num);
