@@ -3,7 +3,7 @@ before_script:
   #- apt-get update
   #- apt-get install --assume-yes make curl unzip avr-libc binutils-avr gcc-avr avrdude
 
-cli:
+inga:
   tags:
     - inga
   script:
@@ -27,7 +27,6 @@ cli:
     #- sleep 5; kill -9 $PID
 buildtest:
   tags:
-    - lab
     - docker
   image: riot/riotbuild
   script:
