@@ -33,6 +33,8 @@
 #include "periph_conf.h"
 #define ENABLE_DEBUG (1)
 #include "debug.h"
+/* required for INTERRUPT VECT NUM */
+#include "board.h"
 
 #define GPIO_BASE_PORT_A        (0x20)
 #define GPIO_OFFSET_PORT_H      (0xCB)
@@ -162,39 +164,38 @@ static inline uint8_t pcint_port_pin(volatile uint8_t *reg) {
   return pin;
 }
 
-// TODO(rh): Make this better!
-//gpio_cb_t radio_cb = NULL;
-//void *radio_arg = NULL;
 #ifdef GPIO_PC_INT_NUMOF
+
+#ifndef AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
+#error gpio.c requires the definition of AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
+#endif
+
 /*
  * PCINT0 is always defined, if GPIO_PC_INT_NUMOF is defined
  */
-/// Used for
-#if PCINT0_vect != AVR_CONTEXT_SWAP_INTERRUPT_VECT
+#if PCINT0_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT0_vect) {
   pcint_handler(0, pcint_port_pin(&PCMSK0));
 }
 #endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #if defined(PCINT1_vect)
-#if PCINT1_vect != AVR_CONTEXT_SWAP_INTERRUPT_VECT
+#if PCINT1_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT1_vect) {
   pcint_handler(1, pcint_port_pin(&PCMSK1));
 }
 #endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif /* PCINT1_vect */
 #if defined(PCINT2_vect)
-#if PCINT2_vect != AVR_CONTEXT_SWAP_INTERRUPT_VECT
+#if PCINT2_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT2_vect) {
   pcint_handler(2, pcint_port_pin(&PCMSK2));
 }
 #endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif /* PCINT2_vect */
 #if defined(PCINT3_vect)
-#if PCINT3_vect != AVR_CONTEXT_SWAP_INTERRUPT_VECT
+#if PCINT3_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT3_vect) {
-  // DEBUG("PCINT3_vect %u\n", pcint_port_pin(&PCMSK3));
   pcint_handler(3, pcint_port_pin(&PCMSK3)); // pcint_port_pin(&PCMSK3)
-  // radio_cb(radio_arg);
 }
 #endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif /* PCINT3_vect */
@@ -239,9 +240,6 @@ int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
 
            pcint[port_num*8+pin_num].cb = cb;
            pcint[port_num*8+pin_num].arg = arg;
-
-           //radio_cb = cb;
-           //radio_arg = arg;
         return 0;
     }
 

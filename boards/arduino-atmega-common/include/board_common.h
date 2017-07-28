@@ -70,6 +70,7 @@ extern "C" {
             PCMSK1 |= (1 << PCINT13); \
 } while (0)
 #define AVR_CONTEXT_SWAP_INTERRUPT_VECT  PCINT1_vect
+#define AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM  PCINT1_vect_num
 #define AVR_CONTEXT_SWAP_TRIGGER   PORTC ^= (1 << PC5)
 #endif
 
@@ -80,6 +81,7 @@ extern "C" {
     PCMSK1 |= (1 << PCINT15); \
 } while (0)
 #define AVR_CONTEXT_SWAP_INTERRUPT_VECT  PCINT1_vect
+#define AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM  PCINT1_vect_num
 #define AVR_CONTEXT_SWAP_TRIGGER   PORTJ ^= (1 << PJ6)
 #endif
 
