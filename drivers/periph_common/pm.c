@@ -24,7 +24,7 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-#ifndef MODULE_PM_LAYERED
+#if !defined( MODULE_PM_LAYERED ) && !defined( CPU_X86 )
 void pm_set_lowest(void) { }
 
 void pm_off(void)
