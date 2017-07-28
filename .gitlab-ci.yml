@@ -32,7 +32,9 @@ stm32:
     - stm32
     - lab
   script:
-    # TODO(rh): use --serial 
+    - apt-get update
+    - apt-get install openocd
+    # TODO(rh): use --serial
     - cd examples/hello-world/
     - make BOARD=stm32f4discovery flash
 
