@@ -25,14 +25,27 @@ inga:
     #- echo ${PID}
     #- ../../dist/tools/inga_tool/inga_tool -r -d ${PORT}
     #- sleep 5; kill -9 $PID
+
 buildtest:
   tags:
     - docker
   image: riot/riotbuild
   script:
-    #- apt-get update
-    #- apt-get install --assume-yes build-essential
-    #- apt-get install --assume-yes make curl unzip avr-libc binutils-avr gcc-avr avrdude
-    #- apt-get install --assume-yes binutils-msp430 gcc-msp430 gdb-msp430 msp430-libc msp430mcu mspdebug
     - cd examples/hello-world/
     - make buildtest
+
+build-qemu:
+  tags:
+    - docker
+  image: riot/riotbuild
+  script:
+    - cd examples/hello-world/
+    - make BOARD=qemu-i386 buildtest
+
+build-waspmote-pro:
+  tags:
+    - docker
+  image: riot/riotbuild
+  script:
+    - cd examples/hello-world/
+    - make BOARD=waspmote-pro buildtest
