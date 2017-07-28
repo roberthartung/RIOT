@@ -31,6 +31,8 @@ buildtest:
     - docker
   script:
     - apt-get update
+    - apt-get install --assume-yes build-essential
     - apt-get install --assume-yes make curl unzip avr-libc binutils-avr gcc-avr avrdude
+    - apt-get install --assume-yes binutils-msp430 gcc-msp430 gdb-msp430 msp430-libc msp430mcu mspdebug
     - cd examples/hello-world/
     - make buildtest
