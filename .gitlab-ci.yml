@@ -3,7 +3,22 @@ before_script:
   #- apt-get update
   #- apt-get install --assume-yes make curl unzip avr-libc binutils-avr gcc-avr avrdude
 
-inga:
+stages:
+  - build
+  - test
+
+buildtest:
+  stage: build
+  tags:
+    - docker
+    - lab
+  image: riot/riotbuild
+  script:
+    - cd examples/hello-world/
+    - make buildtest
+
+inga-helloworld:
+  stage: test
   tags:
     - inga
     - lab
@@ -13,21 +28,21 @@ inga:
     - echo $PORT
     - cd examples/hello-world/
     - make PORT=${PORT} BOARD=inga-red flash
-    #- make PORT=${PORT} BOARD=inga-red term &
-    #- PID=$!
-    #- echo ${PID}
-    #- ../../dist/tools/inga_tool/inga_tool -r -d ${PORT}
-    #- sleep 5; kill -9 $PID
-    - cd -
+
+inga:
+  stage: test
+  tags:
+    - inga
+    - lab
+  script:
+    - python3 -m serial.tools.list_ports -v
+    - export PORT=`python3 -m serial.tools.list_ports -v 2>/dev/null | grep -B 2 'A502C3XN' | head -n 1`
+    - echo $PORT
     - cd tests/unittests/
     - make PORT=${PORT} BOARD=inga-red tests-core flash
-    #- make PORT=${PORT} BOARD=inga-red term &
-    #- PID=$!
-    #- echo ${PID}
-    #- ../../dist/tools/inga_tool/inga_tool -r -d ${PORT}
-    #- sleep 5; kill -9 $PID
 
 stm32-helloworld:
+  stage: test
   tags:
     - stm32
     - lab
@@ -38,18 +53,10 @@ stm32-helloworld:
     - make BOARD=stm32f4discovery flash
 
 stm32-unittests:
+  stage: test
   tags:
     - stm32
     - lab
   script:
     - cd tests/unittests/
     - make BOARD=stm32f4discovery tests-core flash
-
-buildtest:
-  tags:
-    - docker
-    - lab
-  image: riot/riotbuild
-  script:
-    - cd examples/hello-world/
-    - make buildtest
