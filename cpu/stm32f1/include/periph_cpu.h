@@ -60,7 +60,7 @@ extern "C" {
  * @brief   Override the default initial PM blocker
  * @todo   we block all modes per default, until PM is cleanly implemented
  */
-#define PM_BLOCKER_INITIAL  { .val_u32 = 0x01010101 }
+#define PM_BLOCKER_INITIAL  { .val = 0x01010101 }
 
 #ifndef DOXYGEN
 /**
