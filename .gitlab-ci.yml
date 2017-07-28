@@ -27,7 +27,7 @@ inga:
     #- ../../dist/tools/inga_tool/inga_tool -r -d ${PORT}
     #- sleep 5; kill -9 $PID
 
-stm32:
+stm32-helloworld:
   tags:
     - stm32
     - lab
@@ -36,6 +36,14 @@ stm32:
     #- export SERIAL=
     - cd examples/hello-world/
     - make BOARD=stm32f4discovery flash
+
+stm32-unittests:
+  tags:
+    - stm32
+    - lab
+  script:
+    - cd tests/unittests/
+    - make BOARD=stm32f4discovery tests-core flash
 
 buildtest:
   tags:
