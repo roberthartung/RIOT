@@ -6,6 +6,7 @@ before_script:
 inga:
   tags:
     - inga
+    - lab
   script:
     - python3 -m serial.tools.list_ports -v
     - export PORT=`python3 -m serial.tools.list_ports -v 2>/dev/null | grep -B 2 'A502C3XN' | head -n 1`
@@ -25,6 +26,15 @@ inga:
     #- echo ${PID}
     #- ../../dist/tools/inga_tool/inga_tool -r -d ${PORT}
     #- sleep 5; kill -9 $PID
+
+stm32:
+  tags:
+    - stm32
+    - lab
+  script:
+    # TODO(rh): use --serial 
+    - cd examples/hello-world/
+    - make BOARD=stm32f4discovery flash
 
 buildtest:
   tags:
