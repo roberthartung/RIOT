@@ -34,11 +34,3 @@ buildtest:
   script:
     - cd examples/hello-world/
     - make buildtest
-
-build-qemu:
-  tags:
-    - docker
-  image: riot/riotbuild
-  script:
-    - cd examples/hello-world/
-    - make BOARD=qemu-i386
