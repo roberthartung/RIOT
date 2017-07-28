@@ -1,12 +1,11 @@
-USEMODULE +=inga-common
+USEMODULE += inga-common
 
-include $(RIOTBOARD)/inga-common/Makefile.include
-
-# Flasher is board dependent!
-export FLASHER = avrdude
-export FFLAGS =-c avr109 -p m1284p -P $(PORT) -b 230400 -u -U flash:w:$(HEXFILE)
+# Use flash tool
+include $(RIOTMAKE)/tools/inga_tool.inc.mk
 
 export INCLUDES += -I$(RIOTBOARD)/inga-common/include/
 
 # setup the boards dependencies
 include $(RIOTBOARD)/$(BOARD)/Makefile.dep
+
+include $(RIOTBOARD)/inga-common/Makefile.include
