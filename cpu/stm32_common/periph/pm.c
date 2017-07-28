@@ -57,7 +57,7 @@ void pm_set(unsigned mode)
 
     cortexm_sleep(deep);
 }
-
+/*
 #if defined(CPU_FAM_STM32F1) || defined(CPU_FAM_STM32F2) || defined(CPU_FAM_STM32F4)
 void pm_off(void)
 {
@@ -65,3 +65,4 @@ void pm_off(void)
     pm_set(0);
 }
 #endif
+*/
