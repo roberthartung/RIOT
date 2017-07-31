@@ -11,7 +11,7 @@ buildtest:
   stage: build
   tags:
     - docker
-    - lab
+      #- lab
   image: riot/riotbuild
   script:
     - cd examples/hello-world/
