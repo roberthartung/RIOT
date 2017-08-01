@@ -13,6 +13,8 @@ buildtest:
     - docker
     - fai
   image: riot/riotbuild
+  variables:
+    - NPROC: 8
   script:
     - cd examples/hello-world/
     - make buildtest
