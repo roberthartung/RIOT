@@ -14,7 +14,7 @@ buildtest:
     - fai
   image: riot/riotbuild
   before_script:
-    - export NPROC=8
+    - export NPROC_MAX=16
     - export BUILDTEST_VERBOSE=1
   script:
     - cd examples/hello-world/

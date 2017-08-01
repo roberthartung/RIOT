@@ -27,8 +27,6 @@ ifneq (, $(filter buildtest info-concurrency, $(MAKECMDGOALS)))
   endif
 endif
 
-$(info NPROC: $(NPROC))
-
 .PHONY: buildtest info-objsize info-buildsize info-buildsizes \
         info-buildsizes-diff info-build info-boards-supported \
         info-features-missing info-boards-features-missing
@@ -37,6 +35,7 @@ ifeq ($(BUILD_IN_DOCKER),1)
 buildtest: ..in-docker-container
 else
 buildtest:
+	$(info Using $(NPROC) processes)
 	@ \
 	BUILDTESTOK=true; \
 	APP_RETRY=0; \
