@@ -1,13 +1,24 @@
 before_script:
   - echo "Running on ${CI_RUNNER_DESCRIPTION} (#${CI_RUNNER_ID})"
-  #- apt-get update
-  #- apt-get install --assume-yes make curl unzip avr-libc binutils-avr gcc-avr avrdude
 
 stages:
   - build
   - test
 
-buildtest:
+buildtest-default:
+  stage: build
+  tags:
+    - docker
+    - fai
+  image: riot/riotbuild
+  before_script:
+    - export NPROC_MAX=16
+    - export BUILDTEST_VERBOSE=1
+  script:
+    - cd examples/default/
+    - make buildtest
+
+buildtest-helloworld:
   stage: build
   tags:
     - docker
