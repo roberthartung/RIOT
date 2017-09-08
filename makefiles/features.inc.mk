@@ -1,6 +1,5 @@
 # import list of provided features
--include $(RIOTBOARD)/$(BOARD)/Makefile.features
--include $(RIOTCPU)/$(CPU)/Makefile.features
+include $(RIOTBOARD)/$(BOARD)/Makefile.features
 
 # if the CPU does not specify periph_pm, use the fallback module automatically
 ifeq (,$(filter periph_pm,$(FEATURES_PROVIDED)))
