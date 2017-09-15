@@ -1,7 +1,8 @@
 /*
  * Copyright (C) 2015 HAW Hamburg
  *               2016 INRIA
-
+ *               2017 TU Braunschweig, IBR
+ *
  *
  * This file is subject to the terms and conditions of the GNU Lesser
  * General Public License v2.1. See the file LICENSE in the top level
@@ -19,6 +20,7 @@
  * @author      René Herthel <rene-herthel@outlook.de>
  * @author      Francisco Acosta <francisco.acosta@inria.fr>
  * @author      Laurent Navet <laurent.navet@gmail.com>
+ * @author      Robert Hartung <hartung@ibr.cs.tu-bs.de>
  *
  * @}
  */
@@ -31,6 +33,7 @@
 #include "cpu.h"
 #include "periph/gpio.h"
 #include "periph_conf.h"
+#include "board.h"
 
 #define GPIO_BASE_PORT_A        (0x20)
 #define GPIO_OFFSET_PORT_H      (0xCB)
@@ -57,7 +60,19 @@
 #define GPIO_EXT_INT_NUMOF      (2U)
 #endif
 
+#if defined(PCINT3_vect)
+#define GPIO_PC_INT_NUMOF       (32U)
+#elif defined(PCINT2_vect)
+#define GPIO_PC_INT_NUMOF       (24U)
+#elif defined(PCINT1_vect)
+#define GPIO_PC_INT_NUMOF       (16U)
+#elif defined(PCINT0_vect)
+#define GPIO_PC_INT_NUMOF       (8U)
+#endif
+
 static gpio_isr_ctx_t config[GPIO_EXT_INT_NUMOF];
+static gpio_isr_ctx_t pcint[GPIO_PC_INT_NUMOF];
+static gpio_flank_t pcint_flank[GPIO_PC_INT_NUMOF];
 
 /**
  * @brief     Extract the pin number of the given pin
@@ -134,16 +149,57 @@ int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
                   gpio_cb_t cb, void *arg)
 {
     uint8_t pin_num = _pin_num(pin);
+    uint8_t port_num = _port_num(pin);
 
     if ((_port_num(pin) == PORT_D && pin_num > 3)
 #if defined (PORTE)
-         || (_port_num(pin) == PORT_E && pin_num < 4)
-         || (_port_num(pin) != PORT_D && _port_num(pin) != PORT_E)
-#elif defined(CPU_ATMEGA328P)
-         || (pin_num < 2) || (_port_num(pin) != PORT_D)
+        || (_port_num(pin) == PORT_E && pin_num < 4)
+        || (_port_num(pin) != PORT_D && _port_num(pin) != PORT_E)
+#elif defined(CPU_ATMEGA328P)   /* INT0: PD2, INT1: PD3 */
+        || (pin_num < 2) || (_port_num(pin) != PORT_D)
+#elif defined(CPU_ATMEGA1284P)  /* INT0: PD2, INT1: PD3, INT2: PB2 */
+        || ((pin_num < 2) && (_port_num(pin) == PORT_D))
+        || ((pin_num < 2) && (_port_num(pin) == PORT_B))
+        || ((pin_num > 2) && (_port_num(pin) == PORT_B))
+        || (_port_num(pin) == PORT_C)
+        || (_port_num(pin) == PORT_A)
 #endif
-         || ((mode != GPIO_IN) && (mode != GPIO_IN_PU))) {
-        return -1;
+        || ((mode != GPIO_IN) && (mode != GPIO_IN_PU))) {
+
+        gpio_init(pin, mode);
+        cli();
+        switch (port_num) {
+            case 0:
+                PCMSK0 |= (1 << pin_num);
+                PCICR |= (1 << PCIE0);
+                break;
+            case 1:
+                PCMSK1 |= (1 << pin_num);
+                PCICR |= (1 << PCIE1);
+                break;
+#ifdef PCIE2
+            case 2:
+                PCMSK2 |= (1 << pin_num);
+                PCICR |= (1 << PCIE2);
+                break;
+#endif
+#ifdef PCIE3
+            case 3:
+                PCMSK3 |= (1 << pin_num);
+                PCICR |= (1 << PCIE3);
+                break;
+#endif
+            default:
+                return -1;
+                break;
+        }
+        /* set configuration */
+        pcint[port_num * 8 + pin_num].cb = cb;
+        pcint[port_num * 8 + pin_num].arg = arg;
+        pcint_flank[port_num * 8 + pin_num] = flank;
+        /* enable global interrupt flag */
+        sei();
+        return 0;
     }
 
     gpio_init(pin, mode);
@@ -237,6 +293,67 @@ void gpio_write(gpio_t pin, int value)
     }
 }
 
+static inline void pcint_handler(uint8_t port_num, uint8_t pin_num)
+{
+    int gpio_state = gpio_read( GPIO_PIN(port_num, pin_num) );
+    gpio_flank_t flank = pcint_flank[ port_num * 8 + pin_num ];
+
+    if (flank == GPIO_BOTH || (gpio_state && flank == GPIO_RISING) || (!gpio_state && flank == GPIO_FALLING)) {
+        __enter_isr();
+        pcint[port_num * 8 + pin_num].cb( pcint[port_num * 8 + pin_num].arg );
+        __exit_isr();
+    }
+}
+
+static inline uint8_t pcint_port_pin(volatile uint8_t *reg)
+{
+    uint8_t pin = 0;
+    uint8_t val = *reg;
+
+    while (val > 1) {
+        val = val >> 1;
+        pin++;
+    }
+    return pin;
+}
+
+#ifdef GPIO_PC_INT_NUMOF
+
+#ifndef AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
+#error gpio.c requires the definition of AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
+#endif
+
+/*
+ * PCINT0 is always defined, if GPIO_PC_INT_NUMOF is defined
+ */
+#if PCINT0_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
+ISR(PCINT0_vect, ISR_BLOCK) {
+    pcint_handler(0, pcint_port_pin(&PCMSK0));
+}
+#endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
+#if defined(PCINT1_vect)
+#if PCINT1_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
+ISR(PCINT1_vect, ISR_BLOCK) {
+    pcint_handler(1, pcint_port_pin(&PCMSK1));
+}
+#endif  /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
+#endif  /* PCINT1_vect */
+#if defined(PCINT2_vect)
+#if PCINT2_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
+ISR(PCINT2_vect, ISR_BLOCK) {
+    pcint_handler(2, pcint_port_pin(&PCMSK2));
+}
+#endif  /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
+#endif  /* PCINT2_vect */
+#if defined(PCINT3_vect)
+#if PCINT3_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
+ISR(PCINT3_vect, ISR_BLOCK) {
+    pcint_handler(3, pcint_port_pin(&PCMSK3)); // pcint_port_pin(&PCMSK3)
+}
+#endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
+#endif  /* PCINT3_vect */
+#endif  /* GPIO_PC_INT_NUMOF */
+
 static inline void irq_handler(uint8_t pin_num)
 {
     __enter_isr();
@@ -244,54 +361,46 @@ static inline void irq_handler(uint8_t pin_num)
     __exit_isr();
 }
 
-ISR(INT0_vect, ISR_BLOCK)
-{
+ISR(INT0_vect, ISR_BLOCK){
     irq_handler(0); /**< predefined interrupt pin */
 }
 
-ISR(INT1_vect, ISR_BLOCK)
-{
+ISR(INT1_vect, ISR_BLOCK){
     irq_handler(1); /**< predefined interrupt pin */
 }
 
 #if defined(INT2_vect)
-ISR(INT2_vect, ISR_BLOCK)
-{
+ISR(INT2_vect, ISR_BLOCK){
     irq_handler(2); /**< predefined interrupt pin */
 }
 #endif
 
 #if defined(INT3_vect)
-ISR(INT3_vect, ISR_BLOCK)
-{
+ISR(INT3_vect, ISR_BLOCK){
     irq_handler(3); /**< predefined interrupt pin */
 }
 #endif
 
 #if defined(INT4_vect)
-ISR(INT4_vect, ISR_BLOCK)
-{
+ISR(INT4_vect, ISR_BLOCK){
     irq_handler(4); /**< predefined interrupt pin */
 }
 #endif
 
 #if defined(INT5_vect)
-ISR(INT5_vect, ISR_BLOCK)
-{
+ISR(INT5_vect, ISR_BLOCK){
     irq_handler(5); /**< predefined interrupt pin */
 }
 #endif
 
 #if defined(INT6_vect)
-ISR(INT6_vect, ISR_BLOCK)
-{
+ISR(INT6_vect, ISR_BLOCK){
     irq_handler(6); /**< predefined interrupt pin */
 }
 #endif
 
 #if defined(INT7_vect)
-ISR(INT7_vect, ISR_BLOCK)
-{
+ISR(INT7_vect, ISR_BLOCK){
     irq_handler(7); /**< predefined interrupt pin */
 }
 #endif
