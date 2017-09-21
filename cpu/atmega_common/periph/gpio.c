@@ -70,9 +70,14 @@
 #define GPIO_PC_INT_NUMOF       (8U)
 #endif
 
+/* holds the callback and argument for regular interrupts  */
 static gpio_isr_ctx_t config[GPIO_EXT_INT_NUMOF];
+/* holds the callback and argument for pin change interrupts */
 static gpio_isr_ctx_t pcint[GPIO_PC_INT_NUMOF];
+/* stores the configured flank for the respective pcint */
 static gpio_flank_t pcint_flank[GPIO_PC_INT_NUMOF];
+/* stores the last state of each port */
+static uint8_t pcint_state[GPIO_PC_INT_NUMOF / 8];
 
 /**
  * @brief     Extract the pin number of the given pin
@@ -194,9 +199,12 @@ int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
                 break;
         }
         /* set configuration */
-        pcint[port_num * 8 + pin_num].cb = cb;
-        pcint[port_num * 8 + pin_num].arg = arg;
-        pcint_flank[port_num * 8 + pin_num] = flank;
+        int pcint_num = port_num * 8 + pin_num;
+        pcint[pcint_num].cb = cb;
+        pcint[pcint_num].arg = arg;
+        pcint_flank[pcint_num] = flank;
+        /* store current value of the port */
+        pcint_state[port_num] = (_SFR_MEM8(_pin_addr( GPIO_PIN( port_num, pin_num ) )));
         /* enable global interrupt flag */
         sei();
         return 0;
@@ -293,28 +301,37 @@ void gpio_write(gpio_t pin, int value)
     }
 }
 
-static inline void pcint_handler(uint8_t port_num, uint8_t pin_num)
+/* inline function that is used by the PCINT ISR */
+static inline void pcint_handler(uint8_t port_num, volatile uint8_t *mask_reg, volatile uint8_t *pin_reg)
 {
-    int gpio_state = gpio_read( GPIO_PIN(port_num, pin_num) );
-    gpio_flank_t flank = pcint_flank[ port_num * 8 + pin_num ];
+    uint8_t pin_num = 0;
+    /* calculate changed bits */
+    uint8_t state = *pin_reg;
+    /* get pins that changed */
+    uint8_t change = pcint_state[port_num] ^ state;
 
-    if (flank == GPIO_BOTH || (gpio_state && flank == GPIO_RISING) || (!gpio_state && flank == GPIO_FALLING)) {
-        __enter_isr();
-        pcint[port_num * 8 + pin_num].cb( pcint[port_num * 8 + pin_num].arg );
-        __exit_isr();
+    /* apply mask to change */
+    change &= *mask_reg;
+    /* loop through all changed pins with enabled pcint */
+    while (change > 1) {
+        /* check if this pin is enabled & has changed */
+        if (change & 0x1) {
+            uint8_t pin_mask = (1 << pin_num);
+            gpio_flank_t flank = pcint_flank[ port_num * 8 + pin_num ];
+            /* trigger only on correct flank */
+            if (flank == GPIO_BOTH || ((state & pin_mask) && flank == GPIO_RISING) || (!(state & pin_mask) && flank == GPIO_FALLING)) {
+                /* finally execute callback routine */
+                __enter_isr();
+                pcint[port_num * 8 + pin_num].cb( pcint[port_num * 8 + pin_num].arg );
+                __exit_isr();
+            }
+        }
+        change = change >> 1;
+        pin_num++;
     }
-}
 
-static inline uint8_t pcint_port_pin(volatile uint8_t *reg)
-{
-    uint8_t pin = 0;
-    uint8_t val = *reg;
-
-    while (val > 1) {
-        val = val >> 1;
-        pin++;
-    }
-    return pin;
+    /* store current state */
+    pcint_state[port_num] = state;
 }
 
 #ifdef GPIO_PC_INT_NUMOF
@@ -328,29 +345,29 @@ static inline uint8_t pcint_port_pin(volatile uint8_t *reg)
  */
 #if PCINT0_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT0_vect, ISR_BLOCK) {
-    pcint_handler(0, pcint_port_pin(&PCMSK0));
+    pcint_handler(0, &PCMSK0, &PINA);
 }
 #endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #if defined(PCINT1_vect)
 #if PCINT1_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT1_vect, ISR_BLOCK) {
-    pcint_handler(1, pcint_port_pin(&PCMSK1));
+    pcint_handler(1, &PCMSK1, &PINB);
 }
 #endif  /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif  /* PCINT1_vect */
 #if defined(PCINT2_vect)
 #if PCINT2_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT2_vect, ISR_BLOCK) {
-    pcint_handler(2, pcint_port_pin(&PCMSK2));
+    pcint_handler(2, &PCMSK2, &PINC);
 }
 #endif  /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif  /* PCINT2_vect */
 #if defined(PCINT3_vect)
 #if PCINT3_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT3_vect, ISR_BLOCK) {
-    pcint_handler(3, pcint_port_pin(&PCMSK3)); // pcint_port_pin(&PCMSK3)
+    pcint_handler(3, &PCMSK3, &PIND);
 }
-#endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
+#endif  /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif  /* PCINT3_vect */
 #endif  /* GPIO_PC_INT_NUMOF */
 
