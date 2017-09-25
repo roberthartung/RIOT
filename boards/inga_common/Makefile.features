@@ -4,7 +4,6 @@ FEATURES_PROVIDED += periph_spi
 FEATURES_PROVIDED += periph_timer
 FEATURES_PROVIDED += periph_uart
 FEATURES_PROVIDED += periph_i2c
-FEATURES_PROVIDED += periph_pm
 
 #FEATURES_PROVIDED += adxl345
 
