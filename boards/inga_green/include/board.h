@@ -11,9 +11,7 @@
 
 #include "cpu.h"
 #include "periph_conf.h"
-/* For GPIO_IN */
 #include "periph/gpio.h"
-/* from inga_common */
 #include "board_common.h"
 
 #ifdef __cplusplus
