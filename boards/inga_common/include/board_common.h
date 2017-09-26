@@ -42,29 +42,16 @@ extern "C" {
 #define AVR_CONTEXT_SWAP_TRIGGER                PORTA ^= (1 << PA0)
 
 /**
- * Alternative implementation for AVR_CONTEXT_SWAP_INIT 
- * that uses the WDT interrupt
+ * @name    at86rf233 configuration
+ * @{
  */
-/*
-#define AVR_CONTEXT_SWAP_INIT do {\
-    uint8_t tmp;\
-    MCUSR &= ~(1 << WDRF);\
-    tmp = (1 << WDCE) | (1 << WDIE) | (1 << WDE);\
-    WDTCSR = tmp;\
-    tmp |= (1 << WDIE);\
-    WDTCSR = tmp;\
-} while (0)
-#define AVR_CONTEXT_SWAP_INTERRUPT_VECT   WDT_vect
-#define AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM   WDT_vect_num
-#define AVR_CONTEXT_SWAP_TRIGGER          WDTCSR |= (1 << WDIF)
-*/
-
 #define AT86RF2XX_PARAMS_BOARD {.spi = SPI_DEV(0), \
                                 .spi_clk = SPI_CLK_5MHZ, \
                                 .cs_pin = GPIO_PIN(PORT_B, 4),\
                                 .int_pin = GPIO_PIN(PORT_D, 6),\
                                 .sleep_pin = GPIO_PIN(PORT_B, 3),\
                                 .reset_pin = GPIO_PIN(PORT_B, 1)}
+/** @} */
 
 /**
  * @name    xtimer configuration values
