@@ -20,14 +20,24 @@
 
 #include "irq.h"
 #include "periph/pm.h"
+#include "pm_conf.h"
 
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-void __attribute__((weak)) pm_set_lowest(void) {}
+#ifndef MODULE_PM_LAYERED
+#if defined(PERIPH_PM_NEEDS_FALLBACK) || defined(PERIPH_PM_NEEDS_FALLBACK_SET_LOWEST)
+void pm_set_lowest(void) {
 
-void __attribute__((weak)) pm_off(void)
+}
+#endif
+
+#if defined(PERIPH_PM_NEEDS_FALLBACK) || defined(PERIPH_PM_NEEDS_FALLBACK_OFF)
+void pm_off(void)
 {
     irq_disable();
+    pm_set_lowest();
     while(1) {};
 }
+#endif
+#endif /* MODULE_PM_LAYERED */

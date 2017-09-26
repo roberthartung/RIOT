@@ -22,7 +22,9 @@
  */
 
 #include "cpu.h"
+#include "periph/pm.h"
 
+#if defined(PERIPH_PM_NEEDS_NRF5X_COMMON_FALLBACK_OFF)
 void pm_off(void)
 {
 #ifdef CPU_FAM_NRF51
@@ -36,3 +38,4 @@ void pm_off(void)
     NRF_POWER->SYSTEMOFF = 1;
     while(1) {}
 }
+#endif
