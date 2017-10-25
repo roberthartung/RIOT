@@ -170,7 +170,6 @@ int gpio_init_int(gpio_t pin, gpio_mode_t mode, gpio_flank_t flank,
         || (_port_num(pin) == PORT_A)
 #endif
         || ((mode != GPIO_IN) && (mode != GPIO_IN_PU))) {
-
         gpio_init(pin, mode);
         cli();
         switch (port_num) {
@@ -313,7 +312,7 @@ static inline void pcint_handler(uint8_t port_num, volatile uint8_t *mask_reg, v
     /* apply mask to change */
     change &= *mask_reg;
     /* loop through all changed pins with enabled pcint */
-    while (change > 1) {
+    while (change > 0) {
         /* check if this pin is enabled & has changed */
         if (change & 0x1) {
             uint8_t pin_mask = (1 << pin_num);
