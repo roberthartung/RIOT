@@ -34,6 +34,8 @@
 #ifndef PM_LAYERED_H
 #define PM_LAYERED_H
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "assert.h"
 #include "periph_cpu.h"
 
@@ -74,6 +76,17 @@ void pm_unblock(unsigned mode);
  * @param[in]   mode      Target power mode
  */
 void pm_set(unsigned mode);
+
+/**
+ * @brief   Recovers the MCU after a sleep
+ *
+ * This function will be called by @ref thread_yield if the flag is set
+ */
+
+void pm_recover(void);
+
+extern volatile bool pm_sleep_flag;
+extern volatile uint8_t pm_sleep_mode;
 
 #ifdef __cplusplus
 }

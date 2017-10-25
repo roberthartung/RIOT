@@ -46,6 +46,9 @@ typedef union {
  */
 volatile pm_blocker_t pm_blocker = PM_BLOCKER_INITIAL;
 
+volatile uint8_t pm_sleep_mode = 0;
+volatile bool pm_sleep_flag = 0;
+
 void pm_set_lowest(void)
 {
     pm_blocker_t blocker = (pm_blocker_t) pm_blocker;
@@ -86,6 +89,15 @@ void pm_unblock(unsigned mode)
     pm_blocker.val_u8[mode]--;
     irq_restore(state);
 }
+
+#ifndef PROVIDES_PM_RECOVER
+void pm_recover(void) {
+    pm_sleep_flag = false;
+    /* Do clock recovery here! */
+    /* Recover to highest run mode, which is implicitly modeled as highest sleep mode + 1 */
+    pm_sleep_mode = PM_NUM_MODES;
+}
+#endif
 
 #ifndef PROVIDES_PM_LAYERED_OFF
 void  pm_off(void)
