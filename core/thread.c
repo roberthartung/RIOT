@@ -30,6 +30,10 @@
 #include "bitarithm.h"
 #include "sched.h"
 
+#ifdef MODULE_PM_LAYERED
+#include "pm_layered.h"
+#endif
+
 volatile thread_t *thread_get(kernel_pid_t pid)
 {
     if (pid_is_valid(pid)) {
@@ -96,6 +100,11 @@ int thread_wakeup(kernel_pid_t pid)
 void thread_yield(void)
 {
     unsigned old_state = irq_disable();
+#ifdef MODULE_PM_LAYERED
+    if(pm_sleep_flag) {
+        pm_recover();
+    }
+#endif
     thread_t *me = (thread_t *)sched_active_thread;
     if (me->status >= STATUS_ON_RUNQUEUE) {
         clist_lpoprpush(&sched_runqueues[me->priority]);
