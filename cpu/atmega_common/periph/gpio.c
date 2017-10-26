@@ -301,11 +301,11 @@ void gpio_write(gpio_t pin, int value)
 }
 
 /* inline function that is used by the PCINT ISR */
-static inline void pcint_handler(uint8_t port_num, volatile uint8_t *mask_reg, volatile uint8_t *pin_reg)
+static inline void pcint_handler(uint8_t port_num, volatile uint8_t *mask_reg)
 {
     uint8_t pin_num = 0;
     /* calculate changed bits */
-    uint8_t state = *pin_reg;
+    uint8_t state = _SFR_MEM8(_pin_addr(GPIO_PIN(port_num, 1)));
     /* get pins that changed */
     uint8_t change = pcint_state[port_num] ^ state;
 
@@ -344,27 +344,27 @@ static inline void pcint_handler(uint8_t port_num, volatile uint8_t *mask_reg, v
  */
 #if PCINT0_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT0_vect, ISR_BLOCK) {
-    pcint_handler(0, &PCMSK0, &PINA);
+    pcint_handler(0, &PCMSK0);
 }
 #endif /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #if defined(PCINT1_vect)
 #if PCINT1_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT1_vect, ISR_BLOCK) {
-    pcint_handler(1, &PCMSK1, &PINB);
+    pcint_handler(1, &PCMSK1);
 }
 #endif  /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif  /* PCINT1_vect */
 #if defined(PCINT2_vect)
 #if PCINT2_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT2_vect, ISR_BLOCK) {
-    pcint_handler(2, &PCMSK2, &PINC);
+    pcint_handler(2, &PCMSK2);
 }
 #endif  /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif  /* PCINT2_vect */
 #if defined(PCINT3_vect)
 #if PCINT3_vect_num != AVR_CONTEXT_SWAP_INTERRUPT_VECT_NUM
 ISR(PCINT3_vect, ISR_BLOCK) {
-    pcint_handler(3, &PCMSK3, &PIND);
+    pcint_handler(3, &PCMSK3);
 }
 #endif  /* AVR_CONTEXT_SWAP_INTERRUPT_VECT */
 #endif  /* PCINT3_vect */
