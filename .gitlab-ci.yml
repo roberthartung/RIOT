@@ -1,0 +1,78 @@
+before_script:
+  - echo "Running on ${CI_RUNNER_DESCRIPTION} (#${CI_RUNNER_ID})"
+
+stages:
+  - build
+  - test
+
+buildtest-default:
+  stage: build
+  tags:
+    - docker
+    - fai
+  image: riot/riotbuild
+  before_script:
+    - export NPROC_MAX=16
+    - export BUILDTEST_VERBOSE=1
+  script:
+    - cd examples/default/
+    - make buildtest
+
+buildtest-helloworld:
+  stage: build
+  tags:
+    - docker
+    - fai
+  image: riot/riotbuild
+  before_script:
+    - export NPROC_MAX=16
+    - export BUILDTEST_VERBOSE=1
+  script:
+    - cd examples/hello-world/
+    - make buildtest
+
+inga-helloworld:
+  stage: test
+  tags:
+    - inga
+    - lab
+  script:
+    - python3 -m serial.tools.list_ports -v
+    - export PORT=`python3 -m serial.tools.list_ports -v 2>/dev/null | grep -B 2 'A502C3XN' | head -n 1`
+    - echo $PORT
+    - cd examples/hello-world/
+    - make PORT=${PORT} BOARD=inga-red flash
+
+inga:
+  stage: test
+  tags:
+    - inga
+    - lab
+  script:
+    - python3 -m serial.tools.list_ports -v
+    - export PORT=`python3 -m serial.tools.list_ports -v 2>/dev/null | grep -B 2 'A502C3XN' | head -n 1`
+    - echo $PORT
+    - cd tests/unittests/
+    - make PORT=${PORT} BOARD=inga-red tests-core flash
+
+stm32-helloworld:
+  stage: test
+  tags:
+    - stm32
+    - lab
+  script:
+    # TODO(rh): use --serial
+    #- export SERIAL=
+    - cd examples/hello-world/
+    - make BOARD=stm32f4discovery flash
+
+stm32-unittests:
+  stage: test
+  tags:
+    - stm32
+    - lab
+  script:
+    - cd tests/unittests/
+    - make BOARD=stm32f4discovery tests-core flash
+
+
