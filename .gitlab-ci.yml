@@ -41,7 +41,7 @@ inga-helloworld:
     - export PORT=`python3 -m serial.tools.list_ports -v 2>/dev/null | grep -B 2 'A502C3XN' | head -n 1`
     - echo $PORT
     - cd examples/hello-world/
-    - make PORT=${PORT} BOARD=inga-red flash
+    - make PORT=${PORT} BOARD=inga_red flash
 
 inga:
   stage: test
@@ -53,7 +53,7 @@ inga:
     - export PORT=`python3 -m serial.tools.list_ports -v 2>/dev/null | grep -B 2 'A502C3XN' | head -n 1`
     - echo $PORT
     - cd tests/unittests/
-    - make PORT=${PORT} BOARD=inga-red tests-core flash
+    - make PORT=${PORT} BOARD=inga_red tests-core flash
 
 stm32-helloworld:
   stage: test
