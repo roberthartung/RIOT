@@ -46,7 +46,7 @@ extern "C" {
  * @{
  */
 #ifndef UART_STDIO_BAUDRATE
-#define UART_STDIO_BAUDRATE         (9600)
+#define UART_STDIO_BAUDRATE         (38400)
 #endif
 /** @} */
 
