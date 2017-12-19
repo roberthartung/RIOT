@@ -87,6 +87,7 @@ typedef struct {
     uint8_t flags;              /**< flags as defined above */
     int16_t rssi;               /**< rssi of received packet in dBm (optional) */
     uint8_t lqi;                /**< lqi of received packet (optional) */
+    uint8_t crc_valid;          /**< crc valid indicator (optional) */
 } gnrc_netif_hdr_t;
 
 /**
