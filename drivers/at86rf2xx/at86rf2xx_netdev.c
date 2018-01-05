@@ -185,7 +185,6 @@ static int _recv(netdev_t *netdev, void *buf, size_t len, void *info)
 #endif
         radio_info->rssi = RSSI_BASE_VAL + rssi;
         radio_info->crc_valid = crc_ok;
-        (void)crc_ok;
     }
     else {
         at86rf2xx_fb_stop(dev);
